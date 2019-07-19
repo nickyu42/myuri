@@ -6,7 +6,7 @@ python:
   - "3.7"
 
 install:
-  - pip install --user -r server/requirements.txt
+  - pip install -r server/requirements.txt
 
 script:
   - pytest -p no:warnings
