@@ -9,4 +9,4 @@ install:
   - pip install -r server/requirements.txt
 
 script:
-  - pytest -p no:warnings
+  - pytest -p no:warnings server/app
