@@ -13,9 +13,8 @@ def create_app() -> Flask:
 
 app = create_app()
 
-with app.app_context():
-    from app import routes
-    from app import api
+from app import routes
+from app import api
 
-    routes.add_routes()
-    api.create_api()
+routes.add_routes()
+api.create_api()

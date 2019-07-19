@@ -2,7 +2,7 @@
 Author: Nick Yu
 Date created: 19/7/2019
 """
-from flask import current_app as app
+from app import app
 
 
 def add_routes():
