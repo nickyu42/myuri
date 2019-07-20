@@ -1,12 +1,26 @@
 dist: bionic
 
-language: python
+matrix:
+  include:
+    - language: python
+      python:
+        - "3.7"
+      install:
+        - pip install -r server/requirements.txt
+      script:
+        - pytest -p no:warnings
+    - language: node_js
+      node_js:
+        - 11
+      cache:
+        directories:
+          - "node_modules"
+      before_install:
+        - cd client
+      install:
+        - npm install
+      script:
+        - npm test
 
-python:
-  - "3.7"
-
-install:
-  - pip install -r server/requirements.txt
-
-script:
-  - pytest -p no:warnings
+notifications:
+  email: false
