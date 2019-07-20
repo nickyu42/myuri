@@ -5,11 +5,11 @@
   "main": "dist/app.js",
   "scripts": {
     "build-ts": "tsc",
-    "build": "npm run build-ts",
-    "start": "npm run serve",
-    "serve": "webpack-dev-server --progress",
     "watch-ts": "tsc -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development",
+    "start": "npm run serve",
+    "serve": "webpack-dev-server --progress"
   },
   "author": "Nick Yu",
   "license": "MIT",
