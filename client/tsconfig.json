@@ -66,5 +66,5 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "outDir": "dist"
   },
-  "include": ["./src/app"]
+  "include": ["./src"]
 }

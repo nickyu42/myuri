@@ -1,8 +1,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 module.exports = {
-    entry: './src/app/index.ts',
+    entry: './src/index.ts',
     devtool: 'inline-source-map',
     module: {
         rules: [
@@ -10,6 +11,10 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
+            },
+            {
+                test: /\.css$/,
+                use: [{ loader: 'style-loader' }, { loader: 'css-loader' }]
             }
         ]
     },
@@ -21,13 +26,20 @@ module.exports = {
         path: path.resolve(__dirname, 'dist')
     },
     plugins: [
+        new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
-            template: __dirname + "/src/public/index.html",
+            template: path.resolve(__dirname + "/public/index.html"),
+            favicon: path.resolve(__dirname + "/public/favicon.ico"),
             inject: 'body'
         })
     ],
     devServer: {
-        contentBase: __dirname + '/src/public',
+        contentBase: path.resolve(__dirname + '/public'),
         port: 8080,
-    } 
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
+        }
+    }
 };
