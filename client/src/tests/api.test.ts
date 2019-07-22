@@ -1,7 +1,7 @@
-import dummy from '../api';
-
 import { expect } from 'chai';
 import 'mocha';
+
+import { dummy } from '../api';
 
 describe('Dummy function', () => {
 
