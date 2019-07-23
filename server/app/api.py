@@ -2,21 +2,35 @@
 Author: Nick Yu
 Date created: 19/7/2019
 """
-from flask import send_file
+from flask import request, Blueprint
 from flask_restful import Api, Resource
 
-from app import app
 
-
-class Dummy(Resource):
-    """Dummy endpoint for development"""
+class Catalog(Resource):
+    """Endpoint for getting a JSON catalog based on the query given"""
 
     def get(self):
-        return send_file('../static/images/xkcd.jpg', mimetype='image/jpg')
+        args = request.args
+        return str(args)
 
 
-def create_api():
-    """Initializes api and adds all resources"""
-    api = Api(app)
+class Info(Resource):
+    """Endpoint for getting a JSON object with info on given comic"""
 
-    api.add_resource(Dummy, '/dummy')
+    def get(self, id: int):
+        return 'not implemented'
+
+
+class Page(Resource):
+    """Endpoint for getting images from comics"""
+
+    def get(self, id: int, chapter: str, page: int):
+        return 'not implemented'
+
+
+api_bp = Blueprint('api', __name__)
+api = Api(api_bp)
+
+api.add_resource(Catalog, '/c/catalog')
+api.add_resource(Info, '/c/info/<int:id>')
+api.add_resource(Page, '/c/<int:id>/<string:chapter>/<int:page>')

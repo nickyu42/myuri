@@ -2,10 +2,12 @@
 Author: Nick Yu
 Date created: 19/7/2019
 """
-from app import app
+from flask import Blueprint
 
 
-def add_routes():
-    @app.route('/')
-    def index():
-        return 'Hello World'
+main_page = Blueprint('main', __name__)
+
+
+@main_page.route('/')
+def index():
+    return 'Hello World'
