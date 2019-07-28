@@ -3,47 +3,59 @@ Author: Nick Yu
 Date created: 23/7/2019
 """
 import enum
+from typing import Type
 
 from app.database.db import db
 
 
-class Chapter(db.Model):
-    __tablename__ = 'chapter'
+class BaseMixin:
+    """Mixin class for extra functionality"""
 
+    @staticmethod
+    def _create(cls: Type[db.Model], *args, **kwargs):
+        obj = cls(*args, **kwargs)
+        db.session.add(obj)
+        db.session.commit()
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        """Create an instance of this Model"""
+        cls._create(cls, *args, **kwargs)
+
+    def __repr__(self: db.Model):
+        return f'<{type(self).__name__}>'
+
+
+class KeyMixin(BaseMixin):
+    """Mixin class with primary key set by default"""
     id = db.Column(db.Integer, primary_key=True)
-    total_pages = db.Column(db.Integer, nullable=False)
-
-    comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
-    comic = db.relationship('Comic', backref=db.backref('chapters', lazy=True))
 
     def __repr__(self):
-        return f'<Chapter {self.id}>'
+        columns = [f'{key}={val}' for key, val in vars(self).items() if not key.startswith('_')]
+        return f'<{type(self).__name__} {" ".join(columns)}>'
 
 
 class ComicType(enum.Enum):
-    Manga = 1
-    Manhwa = 2
-    Manhua = 3
+    """Enum for comic types"""
+    Japanese = 1
+    Korean = 2
+    Chinese = 3
     Western = 4
 
 
-class Comic(db.Model):
-    __tablename__ = 'comic'
-
-    id = db.Column(db.Integer, primary_key=True)
+class Comic(KeyMixin, db.Model):
     type = db.Column(db.Enum(ComicType), nullable=False)
-    author = db.Column(db.String(80), nullable=False)
+    total_chapters = db.Column(db.Integer, nullable=True)
+    total_volumes = db.Column(db.Integer, nullable=True)
+    description = db.Column(db.Text, nullable=True)
 
-    def __repr__(self):
-        return f'<Comic {self.id}>'
+
+class Chapter(KeyMixin, db.Model):
+    total_pages = db.Column(db.Integer, nullable=False)
+    comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
 
 
-class ComicName(db.Model):
-    __tablename__ = 'comicname'
-
-    id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
-    name = db.Column(db.String(80), unique=True, nullable=False, primary_key=True)
-
-    def __repr__(self):
-        return f'<ComicName {self.name}>'
+class ComicName(KeyMixin, db.Model):
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
 

@@ -26,8 +26,8 @@ def create_app() -> Flask:
 
     if is_dev:
         # allow database access in dev environment for testing
-        from app.database.views import db_routes
-        _app.register_blueprint(db_routes)
+        from app.database.utils import db_cli
+        _app.cli.add_command(db_cli)
 
     return _app
 
