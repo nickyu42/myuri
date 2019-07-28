@@ -10,9 +10,11 @@ class Config:
 
     # TODO change absolute path to environment variable
     _path = os.path.realpath(os.getcwd() + '/data')
+    _db_name = os.environ.get('DB_NAME', default='db')
+
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{_path}/db.db'
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{_path}/{_db_name}.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 

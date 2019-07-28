@@ -59,3 +59,33 @@ class ComicName(KeyMixin, db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False)
     comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
 
+
+def create_data_class(name: str) -> Type:
+    """
+    Creates a metaclass that represents a table
+    with a many-to-many relationship with Comic
+    :param name: name to give the table
+    :return: Class object
+    """
+    return type(
+        name,
+        (KeyMixin, db.Model),
+        {
+            '__tablename__': name,
+            'val': db.Column(db.String(80), unique=True, nullable=False),
+            'comic_id': db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False),
+            'table': db.Table(
+                f'{name}_comic',
+                db.Column(f'{name}_id', db.Integer, db.ForeignKey(f'{name}.id'), primary_key=True),
+                db.Column('comic_id', db.Integer, db.ForeignKey('comic.id'), primary_key=True)
+            )
+        }
+    )
+
+
+Tag = create_data_class('tag')
+Artist = create_data_class('artist')
+Author = create_data_class('author')
+Genre = create_data_class('genre')
+
+
