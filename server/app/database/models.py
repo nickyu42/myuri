@@ -3,6 +3,7 @@ Author: Nick Yu
 Date created: 23/7/2019
 """
 import enum
+import flask.json
 from typing import Type
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -131,3 +132,20 @@ class Comic(KeyMixin, db.Model):
     artists = db.relationship('Artist', lazy=True, secondary=Artist.table, backref=db.backref('comics', lazy='dynamic'))
     authors = db.relationship('Author', lazy=True, secondary=Author.table, backref=db.backref('comics', lazy='dynamic'))
     genres = db.relationship('Genre', lazy=True, secondary=Genre.table, backref=db.backref('comics', lazy='dynamic'))
+
+    @property
+    def json(self):
+        params = [
+            'type',
+            'total_chapters',
+            'total_volumes',
+            'description',
+            'format',
+            'names',
+            'tags',
+            'artists',
+            'authors',
+            'genres'
+        ]
+
+        return flask.json.dumps({p: getattr(self, p) for p in params}, default=str)
