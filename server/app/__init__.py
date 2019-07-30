@@ -31,5 +31,3 @@ def create_app() -> Flask:
 
     return _app
 
-
-app = create_app()

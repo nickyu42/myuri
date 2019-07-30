@@ -29,3 +29,9 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     """Config for development environment"""
     DEBUG = True
+
+
+class TestingConfig(Config):
+    """Config for running unit tests"""
+    SQLALCHEMY_DATABASE_URI = 'sqlite//'
+    TESTING = True
