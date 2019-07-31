@@ -7,6 +7,9 @@ Pytest fixtures for session and db testing
 Some parts used from
 https://gist.github.com/alexmic/7857543 by Alex Michael
 """
+from pathlib import Path
+from typing import Optional
+
 from flask import Flask
 from flask.testing import FlaskClient
 from flask_sqlalchemy import SQLAlchemy
@@ -17,6 +20,7 @@ import os
 from app import init_app
 from app.config import TestingConfig
 from app.database.models import db as _db
+from app.data import AbstractComicParser
 
 
 @pytest.fixture(scope='session')
@@ -41,14 +45,27 @@ def app(request) -> Flask:
 def db(app: Flask, request) -> SQLAlchemy:
     """Session-wide test database"""
 
+    # for database access
     db_file, temp_path = tempfile.mkstemp(suffix='.sqlite')
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{temp_path}'
+
+    # for comic image access
+    fake_image, image_path = tempfile.mkstemp(suffix='jpeg')
 
     def teardown():
         _db.drop_all()
         os.close(db_file)
+        os.close(fake_image)
 
-    init_app(app)
+    class MockComicParser(AbstractComicParser):
+        """Mock the comic parser to always send a Path to a fake image file"""
+        def get_volume_page(self, comic_id: int, volume: str, page: int) -> Optional[Path]:
+            return Path(image_path)
+
+        def get_page(self, comic_id: int, chapter: str, page: int) -> Optional[Path]:
+            return Path(image_path)
+
+    init_app(app, MockComicParser(data_path=Path()))
 
     _db.app = app
     _db.create_all()

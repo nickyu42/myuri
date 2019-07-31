@@ -2,9 +2,12 @@
 Author: Nick Yu
 Date created: 19/7/2019
 """
-from flask import Flask
-from app.config import DevelopmentConfig, ProductionConfig
 import os
+from pathlib import Path
+from flask import Flask
+
+from app.config import DevelopmentConfig, ProductionConfig
+from app.data import AbstractComicParser, ComicParser
 
 
 def create_app() -> Flask:
@@ -22,7 +25,9 @@ def create_app() -> Flask:
     is_dev = env == 'development'
     app.config.from_object(DevelopmentConfig() if is_dev else ProductionConfig())
 
-    init_app(app)
+    data_folder = os.environ.get('DATA_FOLDER', default='./data')
+    comics_path = Path(data_folder)
+    init_app(app, ComicParser(comics_path))
 
     if is_dev:
         init_dev(app)
@@ -30,15 +35,15 @@ def create_app() -> Flask:
     return app
 
 
-def init_app(app: Flask):
+def init_app(app: Flask, parser: AbstractComicParser):
     from app.database import db
     db.init_app(app)
 
     from app.views import main_page
     app.register_blueprint(main_page)
 
-    from app.api import api_routes
-    app.register_blueprint(api_routes)
+    from app.api import create_api
+    app.register_blueprint(create_api(parser))
 
 
 def init_dev(app: Flask):

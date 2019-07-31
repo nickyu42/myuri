@@ -15,20 +15,48 @@ name formats:
 <VOLUME> = vol_<Volume.number>/
 <CHAPTER> = chap_<Chapter.number>/
 <PAGE> = {Page.number:0>4}.(jpg|jpeg|png)
+
+range restrictions:
+<Page.number> = >1
+<Comic.id> = >1
 """
-import os
 from typing import Optional
 from pathlib import Path
+from abc import ABC, abstractmethod
 
-DATA_FOLDER = Path(os.environ.get('DATA_FOLDER', default='./data'))
+
+class AbstractComicParser(ABC):
+    def __init__(self, data_path: Path):
+        self.data_path = data_path
+        super(AbstractComicParser, self).__init__()
+
+    @abstractmethod
+    def get_volume_page(self, comic_id: int, volume: str, page: int) -> Optional[Path]:
+        ...
+
+    @abstractmethod
+    def get_page(self, comic_id: int, chapter: str, page: int) -> Optional[Path]:
+        ...
 
 
-def get_page(comic_id: int, chapter: int, page: int) -> Optional[Path]:
-    files = list(DATA_FOLDER.glob(f'comics/{comic_id}/chap_{chapter}/{page:0>4}.jpg'))
+class ComicParser(AbstractComicParser):
+    def get_volume_page(self, comic_id: int, volume: str, page: int) -> Optional[Path]:
+        files = list(self.data_path.glob(f'comics/{comic_id}/vol_{volume}/{page:0>4}.jpg'))
 
-    if files:
-        return files[0]
+        if files:
+            return files[0]
+        else:
+            # TODO make it so that volumes can contain chapters, so parsing a page should visit a chapter
+            pass
 
-    return None
+        return None
+
+    def get_page(self, comic_id: int, chapter: str, page: int) -> Optional[Path]:
+        files = list(self.data_path.glob(f'comics/{comic_id}/chap_{chapter}/{page:0>4}.jpg'))
+
+        if files:
+            return files[0]
+
+        return None
 
 

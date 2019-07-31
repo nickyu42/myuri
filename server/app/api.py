@@ -2,12 +2,12 @@
 Author: Nick Yu
 Date created: 19/7/2019
 """
-from flask import request, Blueprint, send_file
-from flask_restful import Api, Resource
 from typing import Optional
+from flask import request, Blueprint, send_file
+from flask_restful import Api, Resource, abort
 
 import app.database.models as models
-from app.data import get_page
+from app.data import AbstractComicParser
 
 
 class Catalog(Resource):
@@ -26,9 +26,8 @@ class Info(Resource):
     def get(comic_id: int):
         comic: Optional[models.Comic] = models.Comic.query.get(comic_id)
 
-        # TODO change error to 404 error instead of JSON object
         if not comic:
-            return {'error': f'Comic with id={comic_id} does not exist'}
+            abort(404, message=f'Comic with id={comic_id} does not exist')
 
         return comic.json
 
@@ -36,24 +35,33 @@ class Info(Resource):
 class Page(Resource):
     """Endpoint for getting images from comics"""
 
-    @staticmethod
-    def get(comic_id: int, chapter: int, page: int):
+    def __init__(self, **kwargs):
+        self.parser = kwargs.get('parser')
+
+        if not self.parser:
+            raise ValueError('Parser not provided')
+
+    def get(self, comic_id: int, chapter: str, page: int):
         comic: Optional[models.Comic] = models.Comic.query.get(comic_id)
 
         if not comic:
-            return {'error': f'Comic with id={comic_id} does not exist'}
+            abort(404, message=f'Comic with id={comic_id} does not exist')
 
-        path = get_page(comic.id, chapter, page)
+        path = self.parser.get_page(comic.id, chapter, page)
 
         if not path:
-            return {'error': f'Page {page} of chapter {chapter} could not be found for {comic_id}'}
+            abort(404, message=f'Page {page} of chapter {chapter} could not be found for {comic_id}')
 
         return send_file(path.resolve(), 'image/jpg')
 
 
-api_routes = Blueprint('api', __name__)
-api = Api(api_routes)
+def create_api(data_parser: AbstractComicParser) -> Blueprint:
+    api_routes = Blueprint('api', __name__)
+    api = Api(api_routes)
 
-api.add_resource(Catalog, '/c/catalog')
-api.add_resource(Info, '/c/info/<int:comic_id>')
-api.add_resource(Page, '/c/<int:comic_id>/<int:chapter>/<int:page>')
+    api.add_resource(Catalog, '/c/catalog')
+    api.add_resource(Info, '/c/info/<int:comic_id>')
+    api.add_resource(Page, '/c/<int:comic_id>/<string:chapter>/<int:page>',
+                     resource_class_kwargs={'parser': data_parser})
+
+    return api_routes
