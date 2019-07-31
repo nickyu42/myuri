@@ -7,7 +7,7 @@ import flask.json
 from typing import Type
 from sqlalchemy.ext.declarative import declared_attr
 
-from app.database.db import db
+from app.database import db
 
 
 class BaseMixin:

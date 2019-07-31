@@ -9,25 +9,40 @@ import os
 
 def create_app() -> Flask:
     """Flask app factory"""
-    _app = Flask(__name__)
+    app = Flask(__name__)
 
     env = os.environ.get('FLASK_ENV', default='production')
+
+    if env == 'testing':
+        print('Environment set to "testing". Set to "production" or "development"')
+
+        import sys
+        sys.exit(1)
+
     is_dev = env == 'development'
-    _app.config.from_object(DevelopmentConfig() if is_dev else ProductionConfig())
+    app.config.from_object(DevelopmentConfig() if is_dev else ProductionConfig())
 
-    from app.database.db import db
-    db.init_app(_app)
-
-    from app.views import main_page
-    _app.register_blueprint(main_page)
-
-    from app.api import api_routes
-    _app.register_blueprint(api_routes)
+    init_app(app)
 
     if is_dev:
-        # allow database access in dev environment for testing
-        from app.database.utils import db_cli
-        _app.cli.add_command(db_cli)
+        init_dev(app)
 
-    return _app
+    return app
+
+
+def init_app(app: Flask):
+    from app.database import db
+    db.init_app(app)
+
+    from app.views import main_page
+    app.register_blueprint(main_page)
+
+    from app.api import api_routes
+    app.register_blueprint(api_routes)
+
+
+def init_dev(app: Flask):
+    # allow database access in dev environment for testing
+    from app.database.utils import db_cli
+    app.cli.add_command(db_cli)
 
