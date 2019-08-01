@@ -38,10 +38,14 @@ class AbstractComicParser(ABC):
     def get_page(self, comic_id: int, chapter: str, page: int) -> Optional[Path]:
         ...
 
+    @abstractmethod
+    def get_thumbnail(self, comic_id: int) -> Optional[Path]:
+        ...
+
 
 class ComicParser(AbstractComicParser):
     def get_volume_page(self, comic_id: int, volume: str, page: int) -> Optional[Path]:
-        files = list(self.data_path.glob(f'comics/{comic_id}/vol_{volume}/{page:0>4}.jpg'))
+        files = list(self.data_path.glob(f'comics/{comic_id}/vol_{volume}/{page:0>4}.*'))
 
         if files:
             return files[0]
@@ -52,7 +56,15 @@ class ComicParser(AbstractComicParser):
         return None
 
     def get_page(self, comic_id: int, chapter: str, page: int) -> Optional[Path]:
-        files = list(self.data_path.glob(f'comics/{comic_id}/chap_{chapter}/{page:0>4}.jpg'))
+        files = list(self.data_path.glob(f'comics/{comic_id}/chap_{chapter}/{page:0>4}.*'))
+
+        if files:
+            return files[0]
+
+        return None
+
+    def get_thumbnail(self, comic_id: int) -> Optional[Path]:
+        files = list(self.data_path.glob(f'comics/{comic_id}/thumbnail.*'))
 
         if files:
             return files[0]

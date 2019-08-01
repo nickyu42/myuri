@@ -7,15 +7,14 @@ Pytest fixtures for session and db testing
 Some parts used from
 https://gist.github.com/alexmic/7857543 by Alex Michael
 """
-from pathlib import Path
-from typing import Optional
-
-from flask import Flask
-from flask.testing import FlaskClient
-from flask_sqlalchemy import SQLAlchemy
 import pytest
 import tempfile
 import os
+from pathlib import Path
+from typing import Optional
+from flask import Flask
+from flask.testing import FlaskClient
+from flask_sqlalchemy import SQLAlchemy
 
 from app import init_app
 from app.config import TestingConfig
@@ -63,6 +62,9 @@ def db(app: Flask, request) -> SQLAlchemy:
             return Path(image_path)
 
         def get_page(self, comic_id: int, chapter: str, page: int) -> Optional[Path]:
+            return Path(image_path)
+
+        def get_thumbnail(self, comic_id: int) -> Optional[Path]:
             return Path(image_path)
 
     init_app(app, MockComicParser(data_path=Path()))
