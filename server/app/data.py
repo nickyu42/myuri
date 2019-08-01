@@ -39,7 +39,7 @@ class AbstractComicParser(ABC):
         ...
 
     @abstractmethod
-    def get_thumbnail(self, comic_id: int) -> Optional[Path]:
+    def get_cover(self, comic_id: int) -> Optional[Path]:
         ...
 
 
@@ -63,7 +63,7 @@ class ComicParser(AbstractComicParser):
 
         return None
 
-    def get_thumbnail(self, comic_id: int) -> Optional[Path]:
+    def get_cover(self, comic_id: int) -> Optional[Path]:
         files = list(self.data_path.glob(f'comics/{comic_id}/thumbnail.*'))
 
         if files:

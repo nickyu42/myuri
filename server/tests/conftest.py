@@ -64,7 +64,7 @@ def db(app: Flask, request) -> SQLAlchemy:
         def get_page(self, comic_id: int, chapter: str, page: int) -> Optional[Path]:
             return Path(image_path)
 
-        def get_thumbnail(self, comic_id: int) -> Optional[Path]:
+        def get_cover(self, comic_id: int) -> Optional[Path]:
             return Path(image_path)
 
     init_app(app, MockComicParser(data_path=Path()))
