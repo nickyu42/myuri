@@ -1,2 +1,4 @@
 FLASK_ENV=development
-FLASK_APP=wsgi:app
+DATA_FOLDER=./data
+DB_NAME=db.sqlite
+FLASK_APP=wsgi:create_app
