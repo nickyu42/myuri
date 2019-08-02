@@ -5,6 +5,7 @@ Date created: 19/7/2019
 import os
 from pathlib import Path
 from flask import Flask
+from flask_cors import CORS
 
 from app.config import DevelopmentConfig, ProductionConfig
 from app.data import AbstractComicParser, ComicParser
@@ -13,6 +14,8 @@ from app.data import AbstractComicParser, ComicParser
 def create_app() -> Flask:
     """Flask app factory"""
     app = Flask(__name__)
+
+    cors = CORS(app, resources={r'/c/*': {'origins': '*'}})
 
     env = os.environ.get('FLASK_ENV', default='production')
 

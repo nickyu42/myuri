@@ -1,56 +1,34 @@
 import 'normalize.css';
-import { isNull } from 'util';
 
-import { Comic } from './types'
-import { Api } from './api'
+import { Api } from './api';
+import { Reader } from './reader';
 
 const root = document.body;
-
-enum Viewer {
-  LeftToRight,
-  RightToLeft,
-  Vertical,
-  Webtoom
-}
-
-class Reader {
-  image: HTMLImageElement;
-
-  constructor(public state: Comic, viewer: Viewer = Viewer.RightToLeft) {
-    this.image = new Image()
-  }
-
-  setImage(url: string) {
-    this.image.src = url
-  }
-}
 
 function rootComponent(): HTMLDivElement {
     const element = document.createElement('div');
 
-    const api = new Api()
-    
-    api.get_info(0).then((j) => {
-      const comicRepr = JSON.stringify(j);
-      element.innerHTML = comicRepr;
+    const api = new Api();
 
-      try {
-        const comic = Comic.fromJSON(comicRepr);
-        const reader = new Reader(comic);
+    Api.get_info(1).then((j) => {
+        element.innerHTML = JSON.stringify(j);
 
-        api.get_page(comic).then((blob) => {
-          const url = URL.createObjectURL(blob);
-          reader.setImage(url);
-        })
+        try {
+            const reader = new Reader(1);
 
-        element.appendChild(reader.image);
+            Api.get_cover(1).then((blob) => {
+                const url = URL.createObjectURL(blob);
+                reader.setImage(url);
+            });
 
-      } catch (error) {
-        console.log(error)
-      }
-    })
-  
+            element.appendChild(reader.getImage());
+
+        } catch (error) {
+            console.log(error);
+        }
+    });
+
     return element;
 }
 
-// root.appendChild(rootComponent())
+root.appendChild(rootComponent());
