@@ -4,3 +4,4 @@ Flask_SQLAlchemy==2.4.0
 Flask-Cors==3.0.8
 pytest==5.0.1
 python-dotenv==0.10.3
+uwsgi==2.0.18
