@@ -5,6 +5,7 @@ Date created: 19/7/2019
 from typing import Optional
 from flask import request, Blueprint, send_file
 from flask_restful import Api, Resource, abort
+from flask_cors import CORS
 
 import app.database.models as models
 from app.data import AbstractComicParser
@@ -84,6 +85,8 @@ class Cover(Resource):
 
 def create_api(data_parser: AbstractComicParser) -> Blueprint:
     api_routes = Blueprint('api', __name__)
+    CORS(api_routes)
+
     api = Api(api_routes)
 
     api.add_resource(Catalog, '/c/catalog')

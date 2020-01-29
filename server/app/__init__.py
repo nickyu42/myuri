@@ -15,8 +15,6 @@ def create_app() -> Flask:
     """Flask app factory"""
     app = Flask(__name__)
 
-    cors = CORS(app, resources={r'/c/*': {'origins': '*'}})
-
     env = os.environ.get('FLASK_ENV', default='production')
 
     if env == 'testing':
