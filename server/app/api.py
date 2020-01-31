@@ -2,13 +2,14 @@
 Author: Nick Yu
 Date created: 19/7/2019
 """
+from pathlib import Path
 from typing import Optional
 from flask import request, Blueprint, send_file
 from flask_restful import Api, Resource, abort
 from flask_cors import CORS
 
 import app.database.models as models
-from app.data import AbstractComicParser
+from app.data.base_parser import AbstractComicParser, ComicException
 
 
 class Catalog(Resource):
@@ -49,13 +50,19 @@ class Page(Resource):
         if not comic:
             abort(404, message=f'Comic with id={comic_id} does not exist')
 
-        path = self.parser.get_page(comic.id, chapter, page)
+        try:
+            page = self.parser.get_page(comic.id, chapter, page)
 
-        if not path:
+            if isinstance(page, Path):
+                image_type = page.suffix[1:]
+                return send_file(page.resolve(), f'image/{image_type}')
+
+            file, file_extension = page
+            file_extension = file_extension.replace('.', '')
+            return send_file(file, f'image/{file_extension}')
+
+        except ComicException:
             abort(404, message=f'Page {page} of chapter {chapter} could not be found for {comic_id}')
-
-        image_type = path.suffix[1:]
-        return send_file(path.resolve(), f'image/{image_type}')
 
 
 class Cover(Resource):

@@ -19,7 +19,7 @@ from flask_sqlalchemy import SQLAlchemy
 from app import init_app
 from app.config import TestingConfig
 from app.database.models import db as _db
-from app.data import AbstractComicParser
+from app.data.base_parser import AbstractComicParser
 
 
 @pytest.fixture(scope='session')
