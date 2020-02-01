@@ -13,8 +13,8 @@ from typing import Iterable
 
 import pytest
 
-from data.archive_parser import ArchiveParser
-from data.base_parser import ComicException
+from app.data.archive_parser import ArchiveParser
+from app.data.base_parser import ComicException
 
 
 @pytest.fixture

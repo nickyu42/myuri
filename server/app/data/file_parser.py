@@ -1,4 +1,4 @@
-from data.base_parser import AbstractComicParser, FileLike, ComicException
+from app.data.base_parser import AbstractComicParser, FileLike, ComicException
 
 
 class ComicParser(AbstractComicParser):

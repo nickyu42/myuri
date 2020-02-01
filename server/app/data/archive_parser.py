@@ -3,8 +3,8 @@ import re
 import os
 from pathlib import Path
 
-from data.base_parser import FileLike, ComicException
-from data.file_parser import ComicParser
+from app.data.base_parser import FileLike, ComicException
+from app.data.file_parser import ComicParser
 
 
 class ArchiveParser(ComicParser):
