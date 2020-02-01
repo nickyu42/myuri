@@ -33,7 +33,7 @@ class ArchiveParser(ComicParser):
         try:
             root_archive = zipfile.ZipFile(filepath.resolve())
             pages = root_archive.namelist()
-            pattern = re.compile(f'{page:0>4}.(jpg)|(png)|(jpeg)')
+            pattern = re.compile(f'{page:0>4}.((jpg)|(png)|(jpeg))')
 
             matched = list(filter(pattern.match, pages))
 
@@ -43,4 +43,6 @@ class ArchiveParser(ComicParser):
                     return f, file_extension
 
         except zipfile.BadZipFile as e:
-            raise ComicException(f'{filepath} could not be opened\n{str(e)}')
+            raise ComicException(f'{filepath.resolve()} could not be opened\n{str(e)}')
+
+        raise ComicException(f'Page {page} could not be found in {filepath.resolve()}')
