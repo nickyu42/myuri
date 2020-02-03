@@ -34,7 +34,6 @@ def import_archive_volume(path: Path, name: str, overwrite=False):
         files.sort()
 
         for i, page in enumerate(files):
-            print(page)
             if pattern.match(page):
                 page_filename = f'{i:0>4}{os.path.splitext(page)[-1]}'
                 new_file.write(os.path.join(path_str, page), arcname=page_filename)
