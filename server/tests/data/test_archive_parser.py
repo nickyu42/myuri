@@ -82,4 +82,3 @@ def test_get_page_missing(temp_folder):
 
     with pytest.raises(ComicException):
         parser.get_page(1, 'test', 1)
-

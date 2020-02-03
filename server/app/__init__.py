@@ -50,3 +50,8 @@ def init_dev(app: Flask):
     # allow database access in dev environment for testing
     from app.database.utils import db_cli
     app.cli.add_command(db_cli)
+
+    # add commands for easy importing
+    from app.data.utils import data_cli
+    app.cli.add_command(data_cli)
+

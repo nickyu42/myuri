@@ -33,7 +33,7 @@ class ArchiveParser(ComicParser):
         try:
             root_archive = zipfile.ZipFile(filepath.resolve())
             pages = root_archive.namelist()
-            pattern = re.compile(f'{page:0>4}.((jpg)|(png)|(jpeg))')
+            pattern = re.compile(f'{page:0>4}\\.((jpg)|(png)|(jpeg))')
 
             matched = list(filter(pattern.match, pages))
 
