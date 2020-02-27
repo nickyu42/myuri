@@ -3,7 +3,7 @@
  */
 export class Api {
 
-    constructor(public host: String) {}
+    constructor(public host: string) {}
 
     public static readonly endpoints: { [id: string]: string } = {
         catalog: '/c/catalog',
@@ -57,7 +57,7 @@ export class Api {
     /**
      * Get the comic catalog
      */
-    public get_catalog(): Promise<String> {
+    public get_catalog(): Promise<string> {
         return this.get('catalog').then((response) => response.text());
     }
 }
