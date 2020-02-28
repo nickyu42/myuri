@@ -33,7 +33,7 @@ export class Api {
      * @param chapter which chapter to get
      * @param page which page to get
      */
-    public get_page(id: number, chapter: string, page: number): Promise<Blob> {
+    public getPage(id: number, chapter: string, page: number): Promise<Blob> {
         return this.get('page', id, chapter, page)
         .then((response) => response.blob());
     }
@@ -42,7 +42,7 @@ export class Api {
      * Get info about a comic
      * @param id internal id to get
      */
-    public get_info(id: number): Promise<JSON> {
+    public getInfo(id: number): Promise<JSON> {
         return this.get('info', id).then((response) => response.json());
     }
 
@@ -50,14 +50,14 @@ export class Api {
      * Get cover of a comic
      * @param id internal id
      */
-    public get_cover(id: number): Promise<Blob> {
+    public getCover(id: number): Promise<Blob> {
         return this.get('cover', id).then((response) => response.blob());
     }
 
     /**
      * Get the comic catalog
      */
-    public get_catalog(): Promise<string> {
+    public getCatalog(): Promise<string> {
         return this.get('catalog').then((response) => response.text());
     }
 }
