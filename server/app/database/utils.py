@@ -31,12 +31,13 @@ def get_model(name: str) -> Optional[db.Model]:
 def reset():
     """Setup data persistence"""
     database_name = os.environ.get('DB_NAME')
+    data_path = os.environ.get('DATA_FOLDER', default='./data')
 
     if not database_name:
-        print('DB_NAME is not defined in environment, defaulting to \'db\'')
-        database_name = 'db'
+        print('DB_NAME is not defined in environment, defaulting to \'db.sqlite\'')
+        database_name = 'db.sqlite'
 
-    path = os.path.realpath(f'data/{database_name}.db')
+    path = os.path.realpath(os.path.join(data_path, database_name))
 
     if os.path.exists(path):
         while True:
@@ -64,18 +65,21 @@ def reset():
 def remove():
     """Removes database entirely"""
     database_name = os.environ.get('DB_NAME')
+    data_path = os.environ.get('DATA_FOLDER', default='./data')
 
     if not database_name:
         print('DB_NAME is not defined in environment, cancelling')
         return
 
-    path = os.path.realpath(f'data/{database_name}.db')
+    path = os.path.realpath(os.path.join(data_path, database_name))
 
-    inp = input(f'Are you sure you want to remove {path}? (type y to confirm) ')
+    inp = input(f'Are you sure you want to remove {path}? (type y to confirm) ').lower()
 
     if inp == 'y':
         os.remove(path)
         print('Removed')
+    else:
+        print('Cancelled')
 
 
 @db_cli.command('view')

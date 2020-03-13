@@ -59,6 +59,10 @@ class Page(Resource):
 
             file, file_extension = page
             file_extension = file_extension.replace('.', '')
+
+            # in the case where file is a BytesIO send_file in wsgi will fail
+            # this is due to a wsgi optimization on file_descriptors, however BytesIO is not a fd
+            # wsgi-file-wrapper needs to be disabled
             return send_file(file, f'image/{file_extension}')
 
         except ComicException:

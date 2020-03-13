@@ -7,7 +7,8 @@ from pathlib import Path
 from flask import Flask
 
 from app.config import DevelopmentConfig, ProductionConfig
-from app.data.file_parser import AbstractComicParser, ComicParser
+from app.data.file_parser import AbstractComicParser
+from app.data.archive_parser import ArchiveParser
 
 
 def create_app() -> Flask:
@@ -27,7 +28,7 @@ def create_app() -> Flask:
 
     data_folder = os.environ.get('DATA_FOLDER', default='./data')
     comics_path = Path(data_folder)
-    init_app(app, ComicParser(comics_path))
+    init_app(app, ArchiveParser(comics_path))
 
     if is_dev:
         init_dev(app)
