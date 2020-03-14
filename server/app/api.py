@@ -4,7 +4,7 @@ Date created: 19/7/2019
 """
 from pathlib import Path
 from typing import Optional
-from flask import request, Blueprint, send_file
+from flask import request, Blueprint, send_file, jsonify
 from flask_restful import Api, Resource, abort
 from flask_cors import CORS
 
@@ -31,7 +31,7 @@ class Info(Resource):
         if not comic:
             abort(404, message=f'Comic with id={comic_id} does not exist')
 
-        return comic.json
+        return jsonify(comic.json)
 
 
 class Page(Resource):
