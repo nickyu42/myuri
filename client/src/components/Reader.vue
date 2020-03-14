@@ -45,7 +45,7 @@
         justify="center"
       >
         <v-img
-          v-bind:src="readerInstance.getImage()"
+          v-bind:src="imageURL"
           v-on:input="changePage"
           v-bind:max-width="settings.fitWidth ? window.width : window.maxWidth"
         >
@@ -63,7 +63,6 @@
 <script lang=ts>
 import Vue from "vue";
 import { Api } from "../ts_lib/api";
-import { Reader } from "../ts_lib/reader";
 
 export default Vue.extend({
   name: 'Reader',
@@ -81,17 +80,18 @@ export default Vue.extend({
       fitWidth: false,
     },
 
+    imageURL: "",
+    metaData: {},
+
     apiInstance: Api.getInstance("http://myuri.njkyu.com/api"),
-    readerInstance: new Reader(),
   }),
 
   created() {
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
 
+    this.apiInstance.getInfo(1).then((response) => this.metaData = response);
     this.changePage(1);
-
-    // this.apiInstance.getInfo(1).then((response) => console.log(response))
   },
 
   destroyed() {
@@ -106,8 +106,11 @@ export default Vue.extend({
     },
     
     changePage(page: number) {
-      const url: string = "http://myuri.njkyu.com/api/c/1/1/" + page.toString();
-      this.readerInstance.setImage(url);
+      const imagePromise = this.apiInstance.getPage(1, "1", page);
+      imagePromise.then((blob) => {
+        const url = URL.createObjectURL(blob);
+        this.imageURL = url;
+      });
     }
   }
 });

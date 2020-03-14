@@ -6,8 +6,6 @@ export class Api {
     private static instance: Api;
     private static host: string;
 
-    // constructor() {}
-
     /**
      * Returns the instance
      */
@@ -36,7 +34,7 @@ export class Api {
         return fetch(
             Api.host + Api.endpoints[endpoint] + args.join('/'),
             {
-                mode: 'no-cors'
+                mode: 'cors'
             }
         );
     }
@@ -76,8 +74,4 @@ export class Api {
     public getCatalog(): Promise<string> {
         return this.get('catalog').then((response) => response.text());
     }
-}
-
-export function dummy(): number {
-    return 42;
 }
