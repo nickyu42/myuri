@@ -3,7 +3,21 @@
  */
 export class Api {
 
-    constructor(public host: string) {}
+    private static instance: Api;
+    private static host: string;
+
+    // constructor() {}
+
+    /**
+     * Returns the instance
+     */
+    public static getInstance(host: string): Api {
+        if (!Api.instance) {
+            Api.instance = new Api();
+            Api.host = host;
+        }
+        return Api.instance;
+    }
 
     public static readonly endpoints: { [id: string]: string } = {
         catalog: '/c/catalog',
@@ -18,11 +32,11 @@ export class Api {
      * @param args parameters to add after the endpoint
      * @returns Promise<Response> object
      */
-    public get(endpoint: string, ...args: any[]): Promise<Response> {
+    public get(endpoint: string, ...args: (number | string)[]): Promise<Response> {
         return fetch(
-            this.host + Api.endpoints[endpoint] + args.join('/'),
+            Api.host + Api.endpoints[endpoint] + args.join('/'),
             {
-                mode: 'cors'
+                mode: 'no-cors'
             }
         );
     }
@@ -43,7 +57,9 @@ export class Api {
      * @param id internal id to get
      */
     public getInfo(id: number): Promise<JSON> {
-        return this.get('info', id).then((response) => response.json());
+        return this.get('info', id).then(
+            (response) => response.json()
+        );
     }
 
     /**
