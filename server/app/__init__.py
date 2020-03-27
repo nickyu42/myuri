@@ -5,10 +5,10 @@ Date created: 19/7/2019
 import os
 from pathlib import Path
 from flask import Flask
-from flask_cors import CORS
 
 from app.config import DevelopmentConfig, ProductionConfig
-from app.data import AbstractComicParser, ComicParser
+from app.data.file_parser import AbstractComicParser
+from app.data.archive_parser import ArchiveParser
 
 
 def create_app() -> Flask:
@@ -28,7 +28,7 @@ def create_app() -> Flask:
 
     data_folder = os.environ.get('DATA_FOLDER', default='./data')
     comics_path = Path(data_folder)
-    init_app(app, ComicParser(comics_path))
+    init_app(app, ArchiveParser(comics_path))
 
     if is_dev:
         init_dev(app)
@@ -51,4 +51,8 @@ def init_dev(app: Flask):
     # allow database access in dev environment for testing
     from app.database.utils import db_cli
     app.cli.add_command(db_cli)
+
+    # add commands for easy importing
+    from app.data.utils import data_cli
+    app.cli.add_command(data_cli)
 

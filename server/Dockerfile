@@ -11,4 +11,4 @@ ENV FLASK_ENV=production
 ENV DATA_FOLDER=./data
 ENV DB_NAME=db.sqlite
 
-CMD ["uwsgi", "--ini", "myuri.ini"]
+CMD ["uwsgi", "--ini", "myuri.ini", "--wsgi-disable-file-wrapper"]
