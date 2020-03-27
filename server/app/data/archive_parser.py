@@ -1,6 +1,7 @@
 import zipfile
 import re
 import os
+import io
 from pathlib import Path
 
 from app.data.base_parser import FileLike, ComicException
@@ -10,20 +11,19 @@ from app.data.file_parser import ComicParser
 class ArchiveParser(ComicParser):
 
     def get_page(self, comic_id: int, chapter: str, page: int) -> FileLike:
-        files = list(self.data_path.glob(f'comics/{comic_id}/chap_{chapter}.cbr'))
 
-        if files:
-            filepath = files[0]
+        filepath = self.data_path / Path(f'comics/{comic_id}/chap_{chapter}.cbr')
+
+        if filepath.exists():
             return self.get_zip_page(filepath, page)
 
         raise ComicException(f'comics/{comic_id}/chap_{chapter}.cbr does not exist')
 
     def get_volume_page(self, comic_id: int, volume: str, page: int) -> FileLike:
         # TODO add caching of files to prevent constant zip unpacking
-        files = list(self.data_path.glob(f'comics/{comic_id}/vol_{volume}.cbr'))
+        filepath = self.data_path / Path(f'comics/{comic_id}/vol_{volume}.cbr')
 
-        if files:
-            filepath = files[0]
+        if filepath.exists():
             return self.get_zip_page(filepath, page)
 
         raise ComicException(f'comics/{comic_id}/vol_{volume}.cbr does not exist')
@@ -40,7 +40,8 @@ class ArchiveParser(ComicParser):
             if matched:
                 file_extension = os.path.splitext(matched[0])[-1]
                 with root_archive.open(matched[0]) as f:
-                    return f, file_extension
+                    # send a copy of the file, since it is closed after the return
+                    return io.BytesIO(f.read()), file_extension
 
         except zipfile.BadZipFile as e:
             raise ComicException(f'{filepath.resolve()} could not be opened\n{str(e)}')
