@@ -4,7 +4,6 @@ Date created: 23/7/2019
 """
 import enum
 import flask.json
-from typing import Type
 from sqlalchemy.ext.declarative import declared_attr
 
 from app.database import db
@@ -13,28 +12,22 @@ from app.database import db
 class BaseMixin:
     """Mixin class for extra base functionality"""
 
-    @staticmethod
-    def _create(cls: Type[db.Model], *args, **kwargs):
-        obj = cls(*args, **kwargs)
-        db.session.add(obj)
-        db.session.commit()
+    def serialize(self) -> bytes:
+        """
+        Serializes the Model into a json bytes object
+        Can optionally have a serialization_fields attribute to tell which fields to add
+        :return: serialized model
+        """
+        if hasattr(self, 'serialization_fields'):
+            params = self.serialization_fields
+        else:
+            params = [x for x in dir(self) if not x == 'id' and not x.startswith('_') and x != 'metadata']
 
-    @classmethod
-    def create(cls, *args, **kwargs):
-        """Create an instance of this Model"""
-        cls._create(cls, *args, **kwargs)
+        return flask.json.dumps({p: getattr(self, p) for p in params if hasattr(self, p)}, default=str)
 
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
-
-    def __repr__(self: db.Model):
-        return f'<{type(self).__name__}>'
-
-
-class KeyMixin(BaseMixin):
-    """Mixin class with primary key set by default"""
-    id = db.Column(db.Integer, primary_key=True)
 
     def __repr__(self):
         columns = [f'{key}={val if len(str(val)) < 10 else "..."}' for key, val
@@ -43,13 +36,8 @@ class KeyMixin(BaseMixin):
         return f'<{type(self).__name__} {" ".join(columns)}>'
 
 
-class ComicDataMixin(KeyMixin):
+class ComicDataMixin(BaseMixin):
     """Mixin class that that has a many to many relationship with Comic"""
-    val = db.Column(db.String(80), unique=True, nullable=False)
-
-    @declared_attr
-    def comic_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
 
     @declared_attr
     def table(cls):
@@ -76,42 +64,61 @@ class ComicFormat(enum.Enum):
     Webtoon = 3
 
 
-class Chapter(KeyMixin, db.Model):
+class Chapter(BaseMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer, nullable=False)
     total_pages = db.Column(db.Integer, nullable=False)
     comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
     volume_id = db.Column(db.Integer, db.ForeignKey('volume.id'), nullable=True)
 
+    def serialize(self) -> bytes:
+        return flask.json.dumps({
+            'number': self.number,
+            'total_pages': self.total_pages,
+            'comic': self.comic,
+            'volume_number': self.volume.number
+        }, default=str)
 
-class Volume(KeyMixin, db.Model):
+
+class Volume(BaseMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer, nullable=False)
-    comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
 
-    chapters = db.relationship('Chapter', lazy=True, backref=db.backref('Volume', lazy=True))
+    chapters = db.relationship('Chapter', lazy=True, backref=db.backref('volume', lazy=True))
+
+    serialization_fields = [
+        'number'
+    ]
 
 
-class ComicName(KeyMixin, db.Model):
+class ComicName(BaseMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
 
 
 class Tag(ComicDataMixin, db.Model):
-    """Comic tag table"""
+    id = db.Column(db.Integer, primary_key=True)
+    val = db.Column(db.String)
 
 
 class Artist(ComicDataMixin, db.Model):
-    """Comic artist table"""
+    id = db.Column(db.Integer, primary_key=True)
+    val = db.Column(db.String)
 
 
 class Author(ComicDataMixin, db.Model):
-    """Comic author table"""
+    id = db.Column(db.Integer, primary_key=True)
+    val = db.Column(db.String)
 
 
 class Genre(ComicDataMixin, db.Model):
-    """Comic genre table"""
+    id = db.Column(db.Integer, primary_key=True)
+    val = db.Column(db.String)
 
 
-class Comic(KeyMixin, db.Model):
+class Comic(BaseMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Enum(ComicType), nullable=True)
     total_chapters = db.Column(db.Integer, nullable=True)
     total_volumes = db.Column(db.Integer, nullable=True)
@@ -133,19 +140,15 @@ class Comic(KeyMixin, db.Model):
     authors = db.relationship('Author', lazy=True, secondary=Author.table, backref=db.backref('comics', lazy='dynamic'))
     genres = db.relationship('Genre', lazy=True, secondary=Genre.table, backref=db.backref('comics', lazy='dynamic'))
 
-    @property
-    def json(self):
-        params = [
-            'type',
-            'total_chapters',
-            'total_volumes',
-            'description',
-            'format',
-            'names',
-            'tags',
-            'artists',
-            'authors',
-            'genres'
-        ]
-
-        return flask.json.dumps({p: getattr(self, p) for p in params}, default=str)
+    serialization_fields = [
+        'type',
+        'total_chapters',
+        'total_volumes',
+        'description',
+        'format',
+        'names',
+        'tags',
+        'artists',
+        'authors',
+        'genres'
+    ]
