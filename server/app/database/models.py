@@ -83,6 +83,7 @@ class Chapter(BaseMixin, db.Model):
 class Volume(BaseMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer, nullable=False)
+    comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=True)
 
     chapters = db.relationship('Chapter', lazy=True, backref=db.backref('volume', lazy=True))
 
