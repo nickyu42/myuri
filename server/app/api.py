@@ -31,7 +31,7 @@ class Info(Resource):
         if not comic:
             abort(404, message=f'Comic with id={comic_id} does not exist')
 
-        return jsonify(comic.json)
+        return jsonify(comic.serialize())
 
 
 class Page(Resource):
