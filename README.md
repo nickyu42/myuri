@@ -1,4 +1,5 @@
-# Myuri
+<img align="left" src="https://i.imgur.com/n8shdOD.png" width=230 height=100/>
+<img src="https://i.imgur.com/X2xkpSE.png" width=200 height=100/>
 
 [![Build Status](https://travis-ci.com/nickyu42/Myuri.svg?branch=master)](https://travis-ci.com/nickyu42/Myuri)
 
