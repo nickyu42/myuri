@@ -4,12 +4,19 @@ Date created: 19/7/2019
 """
 from pathlib import Path
 from typing import Optional
-from flask import request, Blueprint, send_file, jsonify
+from flask import request, Blueprint, send_file, jsonify, json, Response, current_app
 from flask_restful import Api, Resource, abort
 from flask_cors import CORS
 
 import app.database.models as models
 from app.data.base_parser import AbstractComicParser, ComicException
+
+
+def jsonify_str(obj):
+    """Drop-in for jsonify where default serializer is str()"""
+
+    json_data = json.dumps(obj, indent=None, separators=(',', ':'), default=str)
+    return Response(json_data, mimetype=current_app.config['JSONIFY_MIMETYPE'])
 
 
 class Catalog(Resource):
@@ -31,7 +38,22 @@ class Info(Resource):
         if not comic:
             abort(404, message=f'Comic with id={comic_id} does not exist')
 
-        return jsonify(comic.serialize())
+        comic_obj = comic.to_obj()
+        comic_obj['names'] = [n.name for n in comic_obj['names']]
+
+        return jsonify_str(comic_obj)
+
+
+class ChapterInfo(Resource):
+
+    @staticmethod
+    def get(chapter_nr: str):
+        chapter: Optional[models.Chapter] = models.Chapter.query.filter(models.Chapter.number == '1').scalar()
+
+        if not chapter:
+            abort(404, message=f'Chapter with nr={chapter_nr} does not exist')
+
+        return jsonify_str(chapter.to_obj())
 
 
 class Page(Resource):
@@ -44,14 +66,14 @@ class Page(Resource):
         if not self.parser:
             raise ValueError('Parser not provided')
 
-    def get(self, comic_id: int, chapter: str, page: int):
+    def get(self, comic_id: int, chapter_nr: str, page: int):
         comic: Optional[models.Comic] = models.Comic.query.get(comic_id)
 
         if not comic:
             abort(404, message=f'Comic with id={comic_id} does not exist')
 
         try:
-            page = self.parser.get_page(comic.id, chapter, page)
+            page = self.parser.get_page(comic.id, chapter_nr, page)
 
             if isinstance(page, Path):
                 image_type = page.suffix[1:]
@@ -66,7 +88,7 @@ class Page(Resource):
             return send_file(file, f'image/{file_extension}')
 
         except ComicException:
-            abort(404, message=f'Page {page} of chapter {chapter} could not be found for {comic_id}')
+            abort(404, message=f'Page {page} of chapter {chapter_nr} could not be found for {comic_id}')
 
 
 class Cover(Resource):
@@ -100,11 +122,12 @@ def create_api(data_parser: AbstractComicParser) -> Blueprint:
 
     api = Api(api_routes)
 
-    api.add_resource(Catalog, '/c/catalog')
-    api.add_resource(Info, '/c/info/<int:comic_id>')
-    api.add_resource(Page, '/c/<int:comic_id>/<string:chapter>/<int:page>',
+    api.add_resource(Catalog, '/catalog')
+    api.add_resource(Info, '/info/<int:comic_id>')
+    api.add_resource(ChapterInfo, '/info/chap/<string:chapter_nr>')
+    api.add_resource(Page, '/<int:comic_id>/<string:chapter_nr>/<int:page>',
                      resource_class_kwargs={'parser': data_parser})
-    api.add_resource(Cover, '/c/cover/<int:comic_id>',
+    api.add_resource(Cover, '/cover/<int:comic_id>',
                      resource_class_kwargs={'parser': data_parser})
 
     return api_routes

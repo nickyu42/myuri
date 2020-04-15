@@ -12,18 +12,28 @@ from app.database import db
 class BaseMixin:
     """Mixin class for extra base functionality"""
 
-    def serialize(self) -> bytes:
+    def to_obj(self) -> dict:
+        """
+        Tries to guess all relevant fields and creates a dict from self
+        :return: dict with all fields
+        """
+        if hasattr(self, 'serialization_fields'):
+            params = self.serialization_fields
+        else:
+            # this also grabs tables
+            params = [x for x in dir(self) if not x == 'id' and not x.startswith('_') and x != 'metadata']
+
+        # deliberately ignores calling to_obj on attributes which are of type Model
+        # this is done to prevent circular references from causing infinite recursive calls
+        return {p: getattr(self, p) for p in params if hasattr(self, p)}
+
+    def serialize(self) -> str:
         """
         Serializes the Model into a json bytes object
         Can optionally have a serialization_fields attribute to tell which fields to add
         :return: serialized model
         """
-        if hasattr(self, 'serialization_fields'):
-            params = self.serialization_fields
-        else:
-            params = [x for x in dir(self) if not x == 'id' and not x.startswith('_') and x != 'metadata']
-
-        return flask.json.dumps({p: getattr(self, p) for p in params if hasattr(self, p)}, default=str)
+        return flask.json.dumps(self.to_obj(), default=str)
 
     @declared_attr
     def __tablename__(cls):
@@ -66,17 +76,24 @@ class ComicFormat(enum.Enum):
 
 class Chapter(BaseMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    number = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String, nullable=True)
+    number = db.Column(db.String, nullable=False)
     total_pages = db.Column(db.Integer, nullable=False)
     comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
     volume_id = db.Column(db.Integer, db.ForeignKey('volume.id'), nullable=True)
 
-    def serialize(self) -> bytes:
+    def to_obj(self) -> dict:
+        vol_nr = None
+
+        if self.volume is not None:
+            vol_nr = self.volume.number
+
         return flask.json.dumps({
+            'title': self.title,
             'number': self.number,
             'total_pages': self.total_pages,
             'comic': self.comic,
-            'volume_number': self.volume.number
+            'volume_number': vol_nr
         }, default=str)
 
 
@@ -87,9 +104,7 @@ class Volume(BaseMixin, db.Model):
 
     chapters = db.relationship('Chapter', lazy=True, backref=db.backref('volume', lazy=True))
 
-    serialization_fields = [
-        'number'
-    ]
+    serialization_fields = ['number']
 
 
 class ComicName(BaseMixin, db.Model):
@@ -97,10 +112,14 @@ class ComicName(BaseMixin, db.Model):
     name = db.Column(db.String(80), unique=True, nullable=False)
     comic_id = db.Column(db.Integer, db.ForeignKey('comic.id'), nullable=False)
 
+    serialization_fields = ['name']
+
 
 class Tag(ComicDataMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     val = db.Column(db.String)
+
+    serialization_fields = ['val']
 
 
 class Artist(ComicDataMixin, db.Model):
