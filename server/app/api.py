@@ -45,6 +45,7 @@ class Info(Resource):
 
 
 class ChapterInfo(Resource):
+    """Endpoint for getting a JSON object with info on given chapter"""
 
     @staticmethod
     def get(chapter_nr: str):

@@ -28,6 +28,14 @@ class ArchiveParser(ComicParser):
 
         raise ComicException(f'comics/{comic_id}/vol_{volume}.cbr does not exist')
 
+    def get_cover(self, comic_id: int) -> FileLike:
+        files = list(self.data_path.glob(f'comics/{comic_id}/thumbnail.*'))
+
+        if files:
+            return files[0]
+
+        raise ComicException(f'comics/{comic_id}/thumbnail.* does not exist')
+
     @staticmethod
     def get_zip_page(filepath: Path, page: int) -> FileLike:
         try:

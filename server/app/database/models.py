@@ -15,6 +15,7 @@ class BaseMixin:
     def to_obj(self) -> dict:
         """
         Tries to guess all relevant fields and creates a dict from self
+        Can optionally have a serialization_fields attribute to determine which fields to add
         :return: dict with all fields
         """
         if hasattr(self, 'serialization_fields'):
@@ -29,8 +30,7 @@ class BaseMixin:
 
     def serialize(self) -> str:
         """
-        Serializes the Model into a json bytes object
-        Can optionally have a serialization_fields attribute to tell which fields to add
+        Serializes the Model into a json str representation
         :return: serialized model
         """
         return flask.json.dumps(self.to_obj(), default=str)
