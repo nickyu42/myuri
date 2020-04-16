@@ -1,0 +1,42 @@
+version: "3.7"
+
+services:
+  backend:
+    build: ./server
+    image: myuri_backend
+    container_name: myuri_backend
+    environment:
+    - FLASK_ENV=production
+    - DATA_FOLDER=./data
+    volumes: 
+    - data:/srv/data
+    restart: on-failure
+
+  frontend:
+    build: ./client
+    image: myuri_frontend
+    container_name: myuri_frontend_build
+    volumes:
+    - static:/app/dist
+
+  nginx:
+    image: nginx:1.17
+    container_name: myuri_nginx
+    volumes:
+    - static:/var/www
+    - data:/srv
+    - ./config/nginx:/etc/nginx/conf.d
+    - type: bind
+      source: /etc/letsencrypt
+      target: /etc/letsyncrypt
+      read_only: true
+    depends_on: 
+    - backend
+    - frontend
+    ports:
+    - 80:80
+    - 443:443
+
+volumes:
+  data:
+  static:

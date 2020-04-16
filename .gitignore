@@ -199,3 +199,6 @@ typings/
 
 # vscode
 .vscode
+
+# nginx config file
+myuri.conf
