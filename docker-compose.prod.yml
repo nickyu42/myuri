@@ -25,7 +25,11 @@ services:
     volumes:
     - static:/var/www
     - data:/srv
-    - ./config/nginx_dev:/etc/nginx/conf.d
+    - ./config/nginx:/etc/nginx/conf.d
+    - type: bind
+      source: /etc/letsencrypt
+      target: /etc/letsyncrypt
+      read_only: true
     depends_on: 
     - backend
     - frontend
