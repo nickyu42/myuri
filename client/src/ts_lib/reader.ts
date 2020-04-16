@@ -6,7 +6,7 @@ import { ComicFormat } from './types';
 export class Reader {
     private readonly image: HTMLImageElement;
 
-    constructor(public id: number, public viewer: ComicFormat = ComicFormat.RightToLeft) {
+    constructor(public viewer: ComicFormat = ComicFormat.RightToLeft) {
         this.image = new Image();
     }
 
