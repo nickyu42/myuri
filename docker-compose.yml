@@ -23,15 +23,14 @@ services:
     image: nginx:1.17
     container_name: myuri_nginx
     volumes:
-    - static:/var/www
+    - static:/var/www/html
     - data:/srv
-    - ./config/nginx_dev:/etc/nginx/conf.d
+    - ./config/nginx_dev/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on: 
     - backend
     - frontend
     ports:
     - 80:80
-    - 443:443
 
 volumes:
   data:
