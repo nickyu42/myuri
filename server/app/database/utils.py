@@ -108,10 +108,12 @@ def insert(table: str, args: List[str]):
     :param table: which table to insert to
     :param args: arguments, should be formatted as "<KEY>=<VAL>"
     """
-    cls: BaseMixin = get_model(table)
+    cls: db.Model = get_model(table)
 
     if cls:
         kwargs = {k: eval(v) for k, v in [tuple(a.split('=')) for a in args]}
-        cls.create(**kwargs)
+        obj = cls(**kwargs)
+        db.session.add(obj)
+        db.session.commit()
     else:
         print(f'{table} does not exist')
