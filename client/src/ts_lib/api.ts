@@ -3,7 +3,19 @@
  */
 export class Api {
 
-    constructor(public host: String) {}
+    private static instance: Api;
+    private static host: string;
+
+    /**
+     * Returns the instance
+     */
+    public static getInstance(host: string): Api {
+        if (!Api.instance) {
+            Api.instance = new Api();
+            Api.host = host;
+        }
+        return Api.instance;
+    }
 
     public static readonly endpoints: { [id: string]: string } = {
         catalog: '/c/catalog',
@@ -18,9 +30,9 @@ export class Api {
      * @param args parameters to add after the endpoint
      * @returns Promise<Response> object
      */
-    public get(endpoint: string, ...args: any[]): Promise<Response> {
+    public get(endpoint: string, ...args: (number | string)[]): Promise<Response> {
         return fetch(
-            this.host + Api.endpoints[endpoint] + args.join('/'),
+            Api.host + Api.endpoints[endpoint] + args.join('/'),
             {
                 mode: 'cors'
             }
@@ -33,7 +45,7 @@ export class Api {
      * @param chapter which chapter to get
      * @param page which page to get
      */
-    public get_page(id: number, chapter: string, page: number): Promise<Blob> {
+    public getPage(id: number, chapter: string, page: number): Promise<Blob> {
         return this.get('page', id, chapter, page)
         .then((response) => response.blob());
     }
@@ -42,26 +54,24 @@ export class Api {
      * Get info about a comic
      * @param id internal id to get
      */
-    public get_info(id: number): Promise<JSON> {
-        return this.get('info', id).then((response) => response.json());
+    public getInfo(id: number): Promise<JSON> {
+        return this.get('info', id).then(
+            (response) => response.json()
+        );
     }
 
     /**
      * Get cover of a comic
      * @param id internal id
      */
-    public get_cover(id: number): Promise<Blob> {
+    public getCover(id: number): Promise<Blob> {
         return this.get('cover', id).then((response) => response.blob());
     }
 
     /**
      * Get the comic catalog
      */
-    public get_catalog(): Promise<String> {
+    public getCatalog(): Promise<string> {
         return this.get('catalog').then((response) => response.text());
     }
-}
-
-export function dummy(): number {
-    return 42;
 }
