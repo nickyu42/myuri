@@ -11,7 +11,7 @@ import pytest
 import tempfile
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, IO
 from flask import Flask
 from flask.testing import FlaskClient
 from flask_sqlalchemy import SQLAlchemy
@@ -66,6 +66,18 @@ def db(app: Flask, request) -> SQLAlchemy:
 
         def get_cover(self, comic_id: int) -> Optional[Path]:
             return Path(image_path)
+
+        def save_page(self, comic_id: int, page_file: IO):
+            pass
+
+        def save_chapter(self, comic_id: int, chapter: str, comic_file: IO):
+            pass
+
+        def comic_exists(self, comic_id: int) -> bool:
+            return True
+
+        def create_comic(self, comic_id: int):
+            pass
 
     init_app(app, MockComicParser(data_path=Path()))
 
