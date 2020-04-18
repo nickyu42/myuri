@@ -4,12 +4,16 @@ Date created: 19/7/2019
 """
 from pathlib import Path
 from typing import Optional
-from flask import request, Blueprint, send_file, jsonify, json, Response, current_app
-from flask_restful import Api, Resource, abort
+
+import werkzeug
+from flask import request, Blueprint, send_file, json, Response, current_app, jsonify
+from flask_restful import Api, Resource, abort, reqparse
 from flask_cors import CORS
+from sqlalchemy.exc import DatabaseError
 
 import app.database.models as models
 from app.data.base_parser import AbstractComicParser, ComicException
+from app.database import db
 
 
 def jsonify_str(obj):
@@ -117,6 +121,94 @@ class Cover(Resource):
         return send_file(path.resolve(), f'image/{image_type}')
 
 
+class CreateComic(Resource):
+    """POST Endpoint for creating new comics"""
+    parser: AbstractComicParser
+    req_parser: reqparse.RequestParser
+
+    def __init__(self, **kwargs):
+        self.parser = kwargs.get('parser')
+        self.req_parser = reqparse.RequestParser()
+        self.req_parser.add_argument('comic_name', type=str, required=True, help='Name cannot be empty')
+
+    def post(self):
+        name = self.req_parser.parse_args()['comic_name']
+        comic = models.Comic()
+        db.session.add(comic)
+        try:
+            db.session.flush()
+            comic_name = models.ComicName(name=name, id=comic.id)
+            db.session.add(comic_name)
+
+            db.session.commit()
+        except DatabaseError:
+            db.session.rollback()
+            abort(500, message=f'Creating comic with name={name} failed')
+
+        return jsonify({'id': comic.id})
+
+
+class UploadComic(Resource):
+    """POST Endpoint for uploading new comics"""
+    parser: AbstractComicParser
+    req_parser: reqparse.RequestParser
+
+    def __init__(self, **kwargs):
+        self.parser = kwargs.get('parser')
+        self.req_parser = reqparse.RequestParser()
+        self.req_parser.add_argument('comic_name', type=str, required=True, help='Name cannot be empty')
+        self.req_parser.add_argument('file_type', type=str, required=True, help='File type cannot be empty')
+        self.req_parser.add_argument('upload_type', type=str, required=True,
+                                     help='Missing type of "chapter" or "page"')
+        self.req_parser.add_argument('file', type=werkzeug.FileStorage, required=True,
+                                     help='Comic File cannot be empty')
+
+        # only necessary in case of 'chapter' upload type
+        self.req_parser.add_argument('chapter', type=str)
+
+        # TODO automatically infer the amount of pages
+        # since the file is in zip/rar format, it should be retrievable from the headers
+        # another solution would be to unpack the compressed file on client side and
+        # make this request force the user to upload pages separately
+        self.req_parser.add_argument('total_pages', type=int)
+
+    def post(self):
+        args = self.req_parser.parse_args()
+
+        file: werkzeug.FileStorage = args['comic_file']
+        comic_name = args['comic_name']
+
+        # check if comic with name exists
+        comic_name = models.ComicName.query.filter(models.ComicName.name == comic_name).scalar()
+
+        if not comic_name:
+            abort(400, message=f'Comic with name={comic_name} does not exist')
+
+        comic_id = comic_name.id
+
+        # store comic in data folder
+        if args['upload_type'] == 'chapter' and 'chapter' in args and 'total_pages' in args:
+            self.save_chapter(comic_id, args['chapter'], args['total_ages'], file)
+            return 200
+        elif args['upload_type'] == 'page':
+            return 400
+
+    def save_chapter(self, comic_id: int, chapter: str, pages: int, file: werkzeug.FileStorage):
+        # create chapter meta
+        chapter = models.Chapter(number=chapter, comic_id=comic_id, total_pages=pages)
+        db.session.add(chapter)
+        try:
+            # attempt to store the chapter and commit to db
+            self.parser.save_chapter(comic_id, chapter, file.stream)
+            db.session.commit()
+        except ComicException as e:
+            db.session.rollback()
+            abort(500, message=f'Uploading failed with error: {str(e)}')
+        except DatabaseError:
+            db.session.rollback()
+            abort(500, message=f'Uploading failed')
+
+
 def create_api(data_parser: AbstractComicParser) -> Blueprint:
     api_routes = Blueprint('api', __name__)
     CORS(api_routes)
@@ -126,9 +218,11 @@ def create_api(data_parser: AbstractComicParser) -> Blueprint:
     api.add_resource(Catalog, '/catalog')
     api.add_resource(Info, '/info/<int:comic_id>')
     api.add_resource(ChapterInfo, '/info/chap/<string:chapter_nr>')
+    api.add_resource(Cover, '/cover/<int:comic_id>', resource_class_kwargs={'parser': data_parser})
     api.add_resource(Page, '/<int:comic_id>/<string:chapter_nr>/<int:page>',
                      resource_class_kwargs={'parser': data_parser})
-    api.add_resource(Cover, '/cover/<int:comic_id>',
-                     resource_class_kwargs={'parser': data_parser})
+
+    api.add_resource(CreateComic, '/create_comic', resource_class_kwargs={'parser': data_parser})
+    api.add_resource(UploadComic, '/upload', resource_class_kwargs={'parser': data_parser})
 
     return api_routes

@@ -2,6 +2,7 @@ import zipfile
 import re
 import os
 import io
+from typing import IO
 from pathlib import Path
 
 from app.data.base_parser import FileLike, ComicException
@@ -9,6 +10,19 @@ from app.data.file_parser import ComicParser
 
 
 class ArchiveParser(ComicParser):
+    """
+    Comic data interface for compressed comics
+    The structure is organized as follows:
+
+    <ROOT> <- DATA_FOLDER/comics/
+    chapters are stored as <ROOT>/<Comic.id>/chap_<Chapter.number>.cbr
+    volumes are stored as <ROOT>/<Comic.id>vol_<Volume.number>.cbr
+    where the .cbr contain pages formatted as {Page.number:0>4}.(jpg|jpeg|png)
+    """
+
+    # TODO add caching of files to prevent constant zip unpacking
+    # another possible method is to unpack the file and just use FileParser?
+    # TODO use different exceptions than just ComicException
 
     def get_page(self, comic_id: int, chapter: str, page: int) -> FileLike:
 
@@ -20,7 +34,6 @@ class ArchiveParser(ComicParser):
         raise ComicException(f'comics/{comic_id}/chap_{chapter}.cbr does not exist')
 
     def get_volume_page(self, comic_id: int, volume: str, page: int) -> FileLike:
-        # TODO add caching of files to prevent constant zip unpacking
         filepath = self.data_path / Path(f'comics/{comic_id}/vol_{volume}.cbr')
 
         if filepath.exists():
@@ -35,6 +48,29 @@ class ArchiveParser(ComicParser):
             return files[0]
 
         raise ComicException(f'comics/{comic_id}/thumbnail.* does not exist')
+
+    def comic_exists(self, comic_id: int) -> bool:
+        path = self.data_path / Path(f'comics/{comic_id}')
+        return path.exists()
+
+    def create_comic(self, comic_id: int):
+        path = self.data_path / Path(f'comics/{comic_id}')
+        path.mkdir(parents=True, exist_ok=True)
+
+    def save_chapter(self, comic_id: int, chapter: str, comic_file: IO):
+        if not self.comic_exists(comic_id):
+            return ComicException(f'Comic with id={comic_id} does not exist')
+
+        if comic_file.closed:
+            return IOError(f'Comic file already closed')
+
+        chapter_path = self.data_path / Path(f'comics/{comic_id}/chap_{chapter}.cbr')
+        chapter_path.touch(exist_ok=True)
+        with chapter_path.open(mode='wb') as new_file:
+            new_file.write(comic_file.read())
+
+    def save_page(self, comic_id: int, page_file: IO):
+        raise NotImplementedError()
 
     @staticmethod
     def get_zip_page(filepath: Path, page: int) -> FileLike:
