@@ -160,7 +160,7 @@ class UploadComic(Resource):
         self.req_parser.add_argument('file_type', type=str, required=True, help='File type cannot be empty')
         self.req_parser.add_argument('upload_type', type=str, required=True,
                                      help='Missing type of "chapter" or "page"')
-        self.req_parser.add_argument('file', type=werkzeug.FileStorage, required=True,
+        self.req_parser.add_argument('file', type=werkzeug.datastructures.FileStorage, required=True,
                                      help='Comic File cannot be empty')
 
         # only necessary in case of 'chapter' upload type
@@ -175,7 +175,7 @@ class UploadComic(Resource):
     def post(self):
         args = self.req_parser.parse_args()
 
-        file: werkzeug.FileStorage = args['comic_file']
+        file: werkzeug.datastructures.FileStorage = args['comic_file']
         comic_name = args['comic_name']
 
         # check if comic with name exists
@@ -193,7 +193,7 @@ class UploadComic(Resource):
         elif args['upload_type'] == 'page':
             return 400
 
-    def save_chapter(self, comic_id: int, chapter: str, pages: int, file: werkzeug.FileStorage):
+    def save_chapter(self, comic_id: int, chapter: str, pages: int, file: werkzeug.datastructures.FileStorage):
         # create chapter meta
         chapter = models.Chapter(number=chapter, comic_id=comic_id, total_pages=pages)
         db.session.add(chapter)
