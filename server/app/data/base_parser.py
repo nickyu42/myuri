@@ -20,10 +20,11 @@ range restrictions:
 <Page.number> = >1
 <Comic.id> = >1
 """
-from typing import Union, BinaryIO, Dict, Any, Tuple
+from typing import Union, BinaryIO, Tuple, IO
 from pathlib import Path
 from abc import ABC, abstractmethod
 
+# File can either be a path to a file or an open IO object with file type
 FileLike = Union[Path, Tuple[BinaryIO, str]]
 
 
@@ -31,48 +32,12 @@ class ComicException(Exception):
     pass
 
 
-class Cache:
-    """
-    Mark and sweep like cache object
-    """
-    cache: Dict[str, Any]
-    counter: Dict[str, int]
-
-    def __init__(self):
-        self.cache = {}
-        self.counter = {}
-
-    def sweep(self):
-        to_remove = filter(lambda _, v: v == 0, self.counter.items())
-
-        for k, _ in to_remove:
-            del self.cache[k]
-            del self.counter[k]
-
-    def add_item(self, key, value):
-        self.cache[key] = value
-        self.counter[key] = 1
-
-    def decrease_reference(self, item):
-        if item in self.counter and self.counter[item] > 0:
-            self.counter[item] -= 1
-
-    def increase_reference(self, item):
-        if item in self.counter:
-            self.counter[item] += 1
-
-    def __getitem__(self, item):
-        return self.cache[item]
-
-
 class AbstractComicParser(ABC):
     data_path: Path
-    file_cache: Cache
 
     def __init__(self, data_path: Path):
         super(AbstractComicParser, self).__init__()
         self.data_path = data_path
-        self.file_cache = Cache()
 
     @abstractmethod
     def get_volume_page(self, comic_id: int, volume: str, page: int) -> FileLike:
@@ -84,4 +49,20 @@ class AbstractComicParser(ABC):
 
     @abstractmethod
     def get_cover(self, comic_id: int) -> FileLike:
+        ...
+
+    @abstractmethod
+    def comic_exists(self, comic_id: int) -> bool:
+        ...
+
+    @abstractmethod
+    def create_comic(self, comic_id: int):
+        ...
+
+    @abstractmethod
+    def save_chapter(self, comic_id: int, chapter: str, comic_file: IO):
+        ...
+
+    @abstractmethod
+    def save_page(self, comic_id: int, page_file: IO):
         ...

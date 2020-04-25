@@ -82,3 +82,79 @@ def test_get_page_missing(temp_folder):
 
     with pytest.raises(ComicException):
         parser.get_page(1, 'test', 1)
+
+
+def test_comic_exists_false(temp_folder):
+    parser = ArchiveParser(temp_folder)
+
+    exists = parser.comic_exists(1)
+    assert not exists
+
+
+def test_comic_exists_true(temp_folder):
+    create_folder(temp_folder, 'comics', '42')
+
+    parser = ArchiveParser(temp_folder)
+
+    exists = parser.comic_exists(42)
+    assert exists
+
+
+def test_create_comic(temp_folder):
+    parser = ArchiveParser(temp_folder)
+
+    parser.create_comic(1)
+
+    new_path = temp_folder / pathlib.Path('comics/1')
+    assert new_path.exists()
+
+
+def test_save_chapter(temp_folder):
+    # populate with mock data
+    create_folder(temp_folder, 'comics', '1')
+    os.mkdir(temp_folder / 'mock')
+
+    # create mock chapter
+    mock_file = temp_folder / 'mock' / '0005.jpeg'
+    mock_file.touch()
+    with mock_file.open('wb') as file:
+        file.write(b'foo')
+
+    # create mock zip
+    mock_zip = temp_folder / 'mock' / 'mock.cbr'
+    with zipfile.ZipFile(mock_zip.resolve(), 'w') as file:
+        file.write(mock_file, arcname='0005.jpeg')
+
+    # call test func
+    parser = ArchiveParser(temp_folder)
+    with mock_zip.open('rb') as file:
+        parser.save_chapter(1, 'foo', file)
+
+    # assert cbr is created
+    new_chapter_path = temp_folder / 'comics' / '1' / 'chap_foo.cbr'
+    assert new_chapter_path.exists()
+
+    # assert contains file
+    with zipfile.ZipFile(new_chapter_path.resolve(), 'r') as file:
+        assert file.read('0005.jpeg') == b'foo'
+
+
+def test_save_chapter_system(temp_folder):
+    # populate with mock data
+    parser = ArchiveParser(temp_folder)
+
+    parser.create_comic(1)
+
+    # create mock zip
+    mock_zip = temp_folder / 'mock.cbr'
+    mock_zip.touch()
+    with zipfile.ZipFile(mock_zip.resolve(), 'w') as file:
+        file.writestr('0002.jpeg', b'foo')
+
+    # call test func
+    with mock_zip.open('rb') as file:
+        parser.save_chapter(1, 'foo', file)
+
+    f, extension = parser.get_page(1, 'foo', 2)
+
+    assert f.read() == b'foo'

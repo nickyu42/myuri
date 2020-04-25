@@ -15,6 +15,7 @@ db_cli = AppGroup('db')
 def get_model(name: str) -> Optional[db.Model]:
     """
     Get Model if it exists
+
     :param name: name of the table to find
     :return: Type object of db.Model
     """
@@ -28,7 +29,8 @@ def get_model(name: str) -> Optional[db.Model]:
 
 
 @db_cli.command('reset')
-def reset():
+@click.option('-f', '--force', is_flag=True)
+def reset(force):
     """Setup data persistence"""
     database_name = os.environ.get('DB_NAME')
     data_path = os.environ.get('DATA_FOLDER', default='./data')
@@ -39,7 +41,13 @@ def reset():
 
     path = os.path.realpath(os.path.join(data_path, database_name))
 
-    if os.path.exists(path):
+    already_exists = os.path.exists(path)
+
+    if already_exists and force:
+        db.drop_all()
+        db.create_all()
+        print('Reset tables')
+    elif already_exists:
         while True:
             inp = input(f'{path} already exists, reset tables? (y/n) ').lower()
 
@@ -62,6 +70,7 @@ def reset():
 
 
 @db_cli.command('remove')
+@click.confirmation_option(prompt='Are you sure you want to remove the db?')
 def remove():
     """Removes database entirely"""
     database_name = os.environ.get('DB_NAME')
@@ -73,13 +82,8 @@ def remove():
 
     path = os.path.realpath(os.path.join(data_path, database_name))
 
-    inp = input(f'Are you sure you want to remove {path}? (type y to confirm) ').lower()
-
-    if inp == 'y':
-        os.remove(path)
-        print('Removed')
-    else:
-        print('Cancelled')
+    os.remove(path)
+    print('Removed')
 
 
 @db_cli.command('view')
@@ -87,6 +91,7 @@ def remove():
 def view(table: str):
     """
     Prints given objects in 'table'
+
     :param table: name of the table to view
     """
     cls: db.Model = get_model(table)
@@ -104,6 +109,7 @@ def view(table: str):
 def insert(table: str, args: List[str]):
     """
     Inserts given object into table
+
     Horribly hacky code!, should only ever be allowed for testing
     :param table: which table to insert to
     :param args: arguments, should be formatted as "<KEY>=<VAL>"

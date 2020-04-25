@@ -1,9 +1,9 @@
 import os
 import re
 import zipfile
-import click
 from pathlib import Path
 
+import click
 from flask.cli import AppGroup
 
 data_cli = AppGroup('data')
