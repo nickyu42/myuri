@@ -137,3 +137,24 @@ def test_save_chapter(temp_folder):
     # assert contains file
     with zipfile.ZipFile(new_chapter_path.resolve(), 'r') as file:
         assert file.read('0005.jpeg') == b'foo'
+
+
+def test_save_chapter_system(temp_folder):
+    # populate with mock data
+    parser = ArchiveParser(temp_folder)
+
+    parser.create_comic(1)
+
+    # create mock zip
+    mock_zip = temp_folder / 'mock.cbr'
+    mock_zip.touch()
+    with zipfile.ZipFile(mock_zip.resolve(), 'w') as file:
+        file.writestr('0002.jpeg', b'foo')
+
+    # call test func
+    with mock_zip.open('rb') as file:
+        parser.save_chapter(1, 'foo', file)
+
+    f, extension = parser.get_page(1, 'foo', 2)
+
+    assert f.read() == b'foo'

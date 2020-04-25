@@ -137,13 +137,15 @@ class CreateComic(Resource):
         db.session.add(comic)
         try:
             db.session.flush()
-            comic_name = models.ComicName(name=name, id=comic.id)
+            comic_name = models.ComicName(name=name, comic_id=comic.id)
             db.session.add(comic_name)
 
             db.session.commit()
         except DatabaseError:
             db.session.rollback()
             abort(500, message=f'Creating comic with name={name} failed')
+
+        self.parser.create_comic(comic.id)
 
         return jsonify({'id': comic.id})
 
@@ -161,7 +163,7 @@ class UploadComic(Resource):
         self.req_parser.add_argument('upload_type', type=str, required=True,
                                      help='Missing type of "chapter" or "page"')
         self.req_parser.add_argument('file', type=werkzeug.datastructures.FileStorage, required=True,
-                                     help='Comic File cannot be empty')
+                                     help='Comic File cannot be empty', location='files')
 
         # only necessary in case of 'chapter' upload type
         self.req_parser.add_argument('chapter', type=str)
@@ -175,7 +177,7 @@ class UploadComic(Resource):
     def post(self):
         args = self.req_parser.parse_args()
 
-        file: werkzeug.datastructures.FileStorage = args['comic_file']
+        file: werkzeug.datastructures.FileStorage = args['file']
         comic_name = args['comic_name']
 
         # check if comic with name exists
@@ -187,19 +189,26 @@ class UploadComic(Resource):
         comic_id = comic_name.id
 
         # store comic in data folder
-        if args['upload_type'] == 'chapter' and 'chapter' in args and 'total_pages' in args:
-            self.save_chapter(comic_id, args['chapter'], args['total_ages'], file)
-            return 200
-        elif args['upload_type'] == 'page':
-            return 400
+        if args['upload_type'] == 'chapter':
+            if args['chapter'] is None:
+                abort(400, message=f'upload_type=chapter, but "chapter" argument missing')
 
-    def save_chapter(self, comic_id: int, chapter: str, pages: int, file: werkzeug.datastructures.FileStorage):
+            if args['total_pages'] is None:
+                abort(400, message=f'upload_type=chapter, but "total_pages" argument missing')
+
+            self.save_chapter(comic_id, args['chapter'], args['total_pages'], file)
+            return 200
+
+        elif args['upload_type'] == 'page':
+            return abort(501, message=f'upload_type=page is currently not supported')
+
+    def save_chapter(self, comic_id: int, chapter_nr: str, pages: int, file: werkzeug.datastructures.FileStorage):
         # create chapter meta
-        chapter = models.Chapter(number=chapter, comic_id=comic_id, total_pages=pages)
+        chapter = models.Chapter(number=chapter_nr, comic_id=comic_id, total_pages=pages)
         db.session.add(chapter)
         try:
             # attempt to store the chapter and commit to db
-            self.parser.save_chapter(comic_id, chapter, file.stream)
+            self.parser.save_chapter(comic_id, chapter_nr, file.stream)
             db.session.commit()
         except ComicException as e:
             db.session.rollback()

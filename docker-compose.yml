@@ -6,7 +6,7 @@ services:
     image: myuri_backend
     container_name: myuri_backend
     environment:
-    - FLASK_ENV=production
+    - FLASK_ENV=development
     - DATA_FOLDER=./data
     volumes: 
     - data:/srv/data
