@@ -1,45 +1,5 @@
 <template>
   <div class="reader">
-
-    <v-app-bar
-        :hide-on-scroll="true"
-        dark
-      >
-        <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
-  
-        <v-toolbar-title>Myuri</v-toolbar-title>
-
-        <v-spacer></v-spacer>
-
-        <v-btn icon>
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-
-    </v-app-bar>
-
-    <v-navigation-drawer
-      v-model="drawer"
-      absolute
-      temporary
-    >
-      <v-list
-        nav
-        dense
-      >
-        <v-list-item-group
-          v-model="group"
-        >
-          <v-list-item>
-            <v-list-item-icon>
-              <v-icon>mdi-home</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Home</v-list-item-title>
-          </v-list-item>
-
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
-
     <v-container>
       <v-row
         justify="center"
@@ -68,8 +28,6 @@ export default Vue.extend({
   name: 'Reader',
 
   data: () => ({
-    drawer: false,
-
     window: {
       width: 0,
       maxWidth: 700,
@@ -80,22 +38,37 @@ export default Vue.extend({
       fitWidth: false,
     },
 
+    totalPages: 177,
+    currentComic: 1,
+    currentChapter: "1",
+    currentPage: 0,
     imageURL: "",
-    metaData: {},
 
+    // current comic meta
+    // TODO make some sort of data store with Vuex?
+    comicMetadata: {},
+    chapterMetadata: {},
     apiInstance: Api.getInstance("http://myuri.njkyu.com/api"),
   }),
 
   created() {
+    // add event handlers
     window.addEventListener('resize', this.handleResize);
+    window.addEventListener('keydown', this.keyHandler);
     this.handleResize();
 
-    this.apiInstance.getInfo(1).then((response) => this.metaData = response);
-    this.changePage(1);
+    // get metadata
+    this.apiInstance.getComicInfo(this.currentComic).then((response) => this.comicMetadata = response);
+    // this.apiInstance.getChapterInfo(this.currentChapter).then((response) => this.chapterMetadata = response);
+    
+    // set page
+    this.changePage(this.currentPage);
   },
 
   destroyed() {
-    window.addEventListener('resize', this.handleResize);
+    // remove event handlers
+    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener('keydown', this.keyHandler);
     this.handleResize();
   },
 
@@ -104,9 +77,34 @@ export default Vue.extend({
       this.window.width = window.innerWidth;
       this.window.height = window.innerHeight;
     },
+
+    keyHandler(event: Event) {
+      if (event instanceof KeyboardEvent) {
+        if (event.key == "ArrowLeft") 
+          this.handleKeyLeft();
+
+        if (event.key == "ArrowRight")
+          this.handleKeyRight();
+
+      }
+    },
+
+    handleKeyRight() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage += 1;
+        this.changePage(this.currentPage);
+      }
+    },
+
+    handleKeyLeft() {
+      if (this.currentPage > 0) {
+        this.currentPage -= 1;
+        this.changePage(this.currentPage);
+      }
+    },
     
     changePage(page: number) {
-      const imagePromise = this.apiInstance.getPage(1, "1", page);
+      const imagePromise = this.apiInstance.getPage(this.currentComic, this.currentChapter, page);
       imagePromise.then((blob) => {
         const url = URL.createObjectURL(blob);
         this.imageURL = url;

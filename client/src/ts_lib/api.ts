@@ -18,10 +18,11 @@ export class Api {
     }
 
     public static readonly endpoints: { [id: string]: string } = {
-        catalog: '/c/catalog',
-        cover: '/c/cover/',
-        info: '/c/info/',
-        page: '/c/',
+        catalog: '/catalog',
+        cover: '/cover/',
+        comicInfo: '/info/',
+        chapterInfo: '/info/chap/',
+        page: '/',
     };
 
     /**
@@ -54,8 +55,18 @@ export class Api {
      * Get info about a comic
      * @param id internal id to get
      */
-    public getInfo(id: number): Promise<JSON> {
-        return this.get('info', id).then(
+    public getComicInfo(id: number): Promise<JSON> {
+        return this.get('comicInfo', id).then(
+            (response) => response.json()
+        );
+    }
+
+    /**
+     * Get info about a chapter
+     * @param id 
+     */
+    public getChapterInfo(id: string): Promise<JSON> {
+        return this.get('chapterInfo', id).then(
             (response) => response.json()
         );
     }
