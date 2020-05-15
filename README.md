@@ -29,3 +29,5 @@ docker-compose up -d
 ```
 docker-compose -f docker-compose.prod.yml up -d
 ```
+Note: The production setup assumes that [letsencrypt](https://letsencrypt.org/) is set up for Nginx
+and will not start otherwise.
