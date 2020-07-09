@@ -191,16 +191,16 @@ class UploadComic(Resource):
         # store comic in data folder
         if args['upload_type'] == 'chapter':
             if args['chapter'] is None:
-                abort(400, message=f'upload_type=chapter, but "chapter" argument missing')
+                abort(400, message='upload_type=chapter, but "chapter" argument missing')
 
             if args['total_pages'] is None:
-                abort(400, message=f'upload_type=chapter, but "total_pages" argument missing')
+                abort(400, message='upload_type=chapter, but "total_pages" argument missing')
 
             self.save_chapter(comic_id, args['chapter'], args['total_pages'], file)
             return 200
 
         elif args['upload_type'] == 'page':
-            return abort(501, message=f'upload_type=page is currently not supported')
+            return abort(501, message='upload_type=page is currently not supported')
 
     def save_chapter(self, comic_id: int, chapter_nr: str, pages: int, file: werkzeug.datastructures.FileStorage):
         # create chapter meta
@@ -215,7 +215,7 @@ class UploadComic(Resource):
             abort(500, message=f'Uploading failed with error: {str(e)}')
         except DatabaseError:
             db.session.rollback()
-            abort(500, message=f'Uploading failed')
+            abort(500, message='Uploading failed')
 
 
 def create_api(data_parser: AbstractComicParser) -> Blueprint:

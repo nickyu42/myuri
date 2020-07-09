@@ -62,7 +62,7 @@ class ArchiveParser(ComicParser):
             return ComicException(f'Comic with id={comic_id} does not exist')
 
         if comic_file.closed:
-            return IOError(f'Comic file already closed')
+            return IOError('Comic file already closed')
 
         chapter_path = self.data_path / Path(f'comics/{comic_id}/chap_{chapter}.cbr')
         chapter_path.touch(exist_ok=True)
