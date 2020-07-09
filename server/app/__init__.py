@@ -55,4 +55,3 @@ def init_dev(app: Flask):
     # add commands for easy importing
     from app.data.utils import data_cli
     app.cli.add_command(data_cli)
-

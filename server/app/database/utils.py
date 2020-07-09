@@ -7,7 +7,7 @@ import os
 from typing import List, Optional
 from flask.cli import AppGroup
 
-from app.database.models import *
+from app.database.models import db
 
 db_cli = AppGroup('db')
 
