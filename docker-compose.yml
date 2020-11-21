@@ -21,11 +21,13 @@ services:
     env_file:
       - .env
     environment:
+      - DEBUG=true
       - POSTGRES_NAME=myuri
       - POSTGRES_USER=myuri
       - POSTGRES_HOST=postgres
     volumes:
       - ./data:/srv/data
+      - ./app:/code
     ports:
     - 8000:8000
     depends_on:
