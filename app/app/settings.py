@@ -42,7 +42,10 @@ INSTALLED_APPS = [
     # For API
     'rest_framework',
 
-    'myuri.apps.MyuriConfig'
+    'myuri.apps.MyuriConfig',
+
+    # Webpack
+    'webpack_loader'
 ]
 
 MIDDLEWARE = [
@@ -81,11 +84,8 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_NAME'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST')
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.getenv('DATABASE_NAME')
     }
 }
 
@@ -127,3 +127,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    (BASE_DIR / 'assets').resolve(),
+)
+
+
+# Webpack
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG,
+        'BUNDLE_DIR_NAME': 'dist/',
+        'STATS_FILE': BASE_DIR / 'assets' / 'dist' / 'webpack-stats.json',
+        'POLL_INTERVAL': 0.1,
+        'TIMEOUT': None,
+        'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
+        'LOADER_CLASS': 'webpack_loader.loader.WebpackLoader',
+    }
+}

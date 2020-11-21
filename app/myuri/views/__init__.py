@@ -1,2 +1,2 @@
 from .index import Index
-from .api_views import *
+from .api import *

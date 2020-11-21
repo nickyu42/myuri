@@ -1,8 +1,13 @@
 const path = require('path');
+const BundleTracker = require('webpack4-bundle-tracker');
+
+const outputDir = path.join('..', 'app', 'assets', 'dist');
 
 module.exports = {
   mode: "production",
-  entry: path.resolve(__dirname, './src/index.ts'),
+  entry: {
+    index: path.resolve(__dirname, './src/index.ts')
+  },
   module: {
     rules: [
       {
@@ -16,7 +21,11 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, '..', 'dist'),
+    filename: '[name].js',
+    publicPath: '',  // necessary for webpack loader
+    path: path.resolve(__dirname, outputDir),
   },
+  plugins: [
+    new BundleTracker({filename: path.join(outputDir, 'webpack-stats.json')})
+  ]
 };
