@@ -1,37 +1,32 @@
 version: "3.7"
 
 services:
+  postgres:
+    image: postgres:13.1-alpine
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=myuri
+      - POSTGRES_DB=myuri
+      - PGDATA=/var/lib/postgresql/data/pgdata
+
   backend:
-    build: ./server
+    build: ./app
     image: myuri_backend
     container_name: myuri_backend
+    env_file:
+      - .env
     environment:
-    - FLASK_ENV=development
-    - DATA_FOLDER=./data
-    volumes: 
-    - data:/srv/data
-    restart: on-failure
-
-  frontend:
-    build: ./client
-    image: myuri_frontend
-    container_name: myuri_frontend_build
+      - POSTGRES_NAME=myuri
+      - POSTGRES_USER=myuri
+      - POSTGRES_HOST=postgres
     volumes:
-    - static:/app/dist
-
-  nginx:
-    image: nginx:1.17
-    container_name: myuri_nginx
-    volumes:
-    - static:/var/www/html
-    - data:/srv
-    - ./config/nginx_dev/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on: 
-    - backend
-    - frontend
+      - ./data:/srv/data
     ports:
-    - 80:80
-
-volumes:
-  data:
-  static:
+    - 8000:8000
+    depends_on:
+      - postgres
