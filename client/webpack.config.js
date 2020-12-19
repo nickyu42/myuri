@@ -22,7 +22,7 @@ module.exports = {
   },
   output: {
     filename: '[name].js',
-    publicPath: '',  // necessary for webpack loader
+    publicPath: '/static/',  // necessary for webpack loader
     path: path.resolve(__dirname, outputDir),
   },
   plugins: [

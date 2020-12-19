@@ -1,4 +1,4 @@
-FROM python:3.8.6-slim
+FROM python:3.9.1-slim
 
 ENV PYTHONUNBUFFERED 1
 
@@ -18,4 +18,4 @@ COPY . /code/
 EXPOSE 8000
 
 # Specify the command to run when the image is run.
-CMD ["python", "/code/manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["/code/entry/prod.sh"]

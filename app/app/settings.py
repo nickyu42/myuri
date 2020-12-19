@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # For API
     'rest_framework',
 
+    # Myuri App
     'myuri.apps.MyuriConfig',
 
     # Webpack
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -132,6 +134,7 @@ STATICFILES_DIRS = (
     (BASE_DIR / 'assets').resolve(),
 )
 
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Webpack
 WEBPACK_LOADER = {

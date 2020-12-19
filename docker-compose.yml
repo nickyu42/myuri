@@ -5,6 +5,8 @@ services:
     build: ./app
     image: myuri_backend
     container_name: myuri_backend
+    command: /code/entry/dev.sh
+    init: true
     env_file:
       - .env
     environment:
