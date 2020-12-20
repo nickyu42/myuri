@@ -37,15 +37,15 @@ jobs:
 
       - name: Build client
         run: |
-        # Enter client
-        cd client
+          # Enter client
+          cd client
 
-        # Build client
-        npm install
-        npm run build
+          # Build client
+          npm install
+          npm run build
 
-        # Return
-        cd ..
+          # Return
+          cd ..
 
       - name: Build and push
         id: docker_build
