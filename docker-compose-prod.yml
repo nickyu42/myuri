@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  backend:
+    build: ./app
+    image: myuri_backend
+    container_name: myuri_backend
+    init: true
+    env_file:
+      - .env
+    environment:
+      - DATABASE_NAME=/srv/data/db.sqlite
+    volumes:
+      - ./data:/srv/data
+
+  webserver:
+    image: caddy:2.1.1-alpine
+    volumes:
+      - ./conf/Caddyfile:/etc/caddy/Caddyfile
+      - ./data/caddy_data:/data
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - backend

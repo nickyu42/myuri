@@ -17,5 +17,8 @@ COPY . /code/
 
 EXPOSE 8000
 
+# Create static files directory
+RUN mkdir -p /var/www/myuri/
+
 # Specify the command to run when the image is run.
 CMD ["/code/entry/prod.sh"]

@@ -1,0 +1,8 @@
+.vscode/
+
+.env
+
+*.sqlite3
+node_modules/
+*.pyc
+data/
