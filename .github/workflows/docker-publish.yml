@@ -10,10 +10,6 @@ on:
     tags:
       - v*
 
-env:
-  IMAGE_NAME: myuri
-  NAME: nickyu42
-
 jobs:
 
   # Push image to Dockerhub
@@ -39,9 +35,9 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./app
-          file: ./Dockerfile
+          file: ./app/Dockerfile
           push: true
-          tags: ${NAME}/${IMAGE_NAME}:latest
+          tags: ${{ github.repository_owner }}/myuri:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
