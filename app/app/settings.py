@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     # For API
     'rest_framework',
 
+    # For API filtering
+    'django_filters',
+
     # Myuri App
     'myuri.apps.MyuriConfig',
 
@@ -149,6 +152,12 @@ WEBPACK_LOADER = {
         'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
         'LOADER_CLASS': 'webpack_loader.loader.WebpackLoader',
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 LOGGING = {
