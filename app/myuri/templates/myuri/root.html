@@ -1,4 +1,4 @@
-{% load render_bundle from webpack_loader %}
+{% load render_entrypoint render_bundle from webpack_loader %}
 {% load static %}
 
 <!DOCTYPE html>
@@ -6,11 +6,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Myuri</title>
+  {% render_entrypoint 'index' 'css' %}
 </head>
 <body>
   <img src="{% static 'media/logo.png' %}" style="width: 20%; height: auto;"/>
   <h1>Hello from Myuri!</h1>
+  <div class="alert alert-primary" role="alert">
+    Test!
+  </div>
 
-  {% render_bundle 'index' 'js' %}
+  {% render_entrypoint 'index' 'js' %}
 </body>
 </html>

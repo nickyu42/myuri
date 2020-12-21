@@ -1,5 +1,6 @@
 const path = require('path');
 const BundleTracker = require('webpack4-bundle-tracker');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const outputDir = path.join('..', 'app', 'assets', 'dist');
 
@@ -15,17 +16,28 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        exclude: '/node_modules/',
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader'
+        ]
+      }
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.css'],
   },
   output: {
     filename: '[name].js',
-    publicPath: '/static/',  // necessary for webpack loader
+    publicPath: '/static/dist/',  // necessary for webpack loader
     path: path.resolve(__dirname, outputDir),
   },
   plugins: [
-    new BundleTracker({filename: path.join(outputDir, 'webpack-stats.json')})
+    new MiniCssExtractPlugin({
+      filename: 'css/[name]-[hash].css'
+    }),
+    new BundleTracker({filename: path.join(outputDir, 'webpack-stats.json')}),
   ]
 };
