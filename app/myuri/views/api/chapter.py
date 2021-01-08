@@ -5,7 +5,7 @@ from myuri.models import Chapter
 from myuri.serializers import ChapterSerializer
 
 
-class ChapterList(generics.ListCreateAPIView):
+class APIChapterList(generics.ListCreateAPIView):
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
@@ -13,6 +13,6 @@ class ChapterList(generics.ListCreateAPIView):
     search_fields = ['title']
 
 
-class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
+class APIChapterDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer

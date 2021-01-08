@@ -7,14 +7,19 @@
   <meta charset="UTF-8">
   <title>Myuri</title>
   {% render_entrypoint 'index' 'css' %}
+  <link type="text/css" href="{% static 'media/css/header.css' %}" rel="stylesheet"/>
 </head>
 <body>
-  <img src="{% static 'media/logo.png' %}" style="width: 20%; height: auto;"/>
-  <h1>Hello from Myuri!</h1>
+<div class="container">
+  {% include 'myuri/header.html' %}
+
   <div class="alert alert-primary" role="alert">
-    Test!
+    Hello! This app is still in heavy development
   </div>
 
-  {% render_entrypoint 'index' 'js' %}
+  {% block main %}{% endblock main %}
+</div>
+
+{% render_entrypoint 'index' 'js' %}
 </body>
 </html>

@@ -5,7 +5,7 @@ from myuri.models import Comic
 from myuri.serializers import ComicSerializer
 
 
-class ComicList(generics.ListCreateAPIView):
+class APIComicList(generics.ListCreateAPIView):
     queryset = Comic.objects.all()
     serializer_class = ComicSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
@@ -13,6 +13,6 @@ class ComicList(generics.ListCreateAPIView):
     search_fields = ['name', 'description']
 
 
-class ComicDetail(generics.RetrieveUpdateDestroyAPIView):
+class APIComicDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comic.objects.all()
     serializer_class = ComicSerializer

@@ -1,2 +1,2 @@
-from .comic import ComicList, ComicDetail
-from .chapter import ChapterList, ChapterDetail
+from .comic import APIComicList, APIComicDetail
+from .chapter import APIChapterList, APIChapterDetail

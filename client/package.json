@@ -20,6 +20,7 @@
     "webpack4-bundle-tracker": "0.0.1-beta"
   },
   "dependencies": {
+    "alpinejs": "^2.8.0",
     "bootstrap": "^5.0.0-beta1",
     "mdb-ui-kit": "^3.0.0"
   }

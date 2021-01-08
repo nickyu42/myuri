@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "talleyrand-quot";
+    src: url("/static/media/fonts/talleyrand-quot.ttf")
+}
+
+#brand-text {
+    font-family: talleyrand-quot;
+    font-size: xx-large;
+}

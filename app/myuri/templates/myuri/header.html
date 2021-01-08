@@ -1,0 +1,23 @@
+{% load static %}
+
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <!--<img src="{% static 'media/images/myuri_logo.svg' %}" 
+             width="20%" height="10%" class="d-inline-block align-middle" alt=""/>-->
+        <span id="brand-text">Myuri</span>
+      </a>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="{% url 'comics' %}">Comics</a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </nav>
+</header>

@@ -1,7 +1,5 @@
-from django.shortcuts import render
-from django.views import View
+from django.views import generic
 
 
-class Index(View):
-    def get(self, request):
-        return render(request, 'myuri/root.html')
+class Index(generic.TemplateView):
+    template_name = 'myuri/index.html'
